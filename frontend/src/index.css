@@ -337,6 +337,25 @@
     font-weight: 500;
     color: var(--gold);
   }
+  .landingCta h2 em.ctaWord {
+    display: inline-block;
+    width: 7.8em;
+    vertical-align: bottom;
+  }
+  .landingCta h2 .ctaWordInner {
+    display: block;
+    animation: ctaSwap 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @keyframes ctaSwap {
+    from {
+      transform: translateY(12px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
   .landingFooter {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding: 30px 6vw;

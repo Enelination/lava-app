@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AuthModal } from './AuthModal'
 import { useAuth } from '../store/authStore'
 import { useNavigate } from 'react-router-dom'
+
+const ctaWords = ['LAVA', 'INTELLIGENCE']
 
 const features = [
   {
@@ -23,6 +25,13 @@ export function LandingPage() {
   const [authTab, setAuthTab] = useState(0)
   const navigate = useNavigate()
   const user = useAuth((s) => s.user)
+
+  const [ctaIdx, setCtaIdx] = useState(0)
+
+  useEffect(() => {
+    const id = setInterval(() => setCtaIdx((i) => (i + 1) % ctaWords.length), 2400)
+    return () => clearInterval(id)
+  }, [])
 
   const goExplore = () => navigate('/app')
 
@@ -106,7 +115,12 @@ export function LandingPage() {
           <i /> Clarity found?
         </span>
         <h2>
-          Just ask <em>LAVA.</em>
+          Just ask{' '}
+          <em className="ctaWord">
+            <span key={ctaIdx} className="ctaWordInner">
+              {ctaWords[ctaIdx]}.
+            </span>
+          </em>
         </h2>
         <button className="button" onClick={() => openAuth(0)}>
           Start a conversation <span>→</span>

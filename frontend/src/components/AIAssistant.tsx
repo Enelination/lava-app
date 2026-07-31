@@ -7,7 +7,7 @@ import toast from 'react-hot-toast'
 import { useAuth } from '../store/authStore'
 import { useApp } from '../store/appStore'
 import { ai as aiApi } from '../lib/api'
-import type { ChatMessage } from '../types'
+import type { ChatMessage, ContentBlock } from '../types'
 
 const quickPrompts = [
   { label: 'Explain market comparison', text: 'What is the market comparison approach?' },
@@ -92,25 +92,25 @@ export function AIAssistant() {
     e.target.value = ''
   }
 
-  const handleDocAttach = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDocAttach = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     if (file.size > 8 * 1024 * 1024) {
       toast.error('File too large (max 8MB).')
       return
     }
-    try {
-      const text = await file.text()
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const dataUrl = ev.target?.result as string
       setPendingDoc({
         type: 'document',
         name: file.name,
-        data: text,
-        kind: file.name.endsWith('.txt') ? 'text' : 'document',
-        text: text.substring(0, 6000),
+        data: dataUrl.split(',')[1],
+        mediaType: file.type || 'application/octet-stream',
+        kind: 'document',
       })
-    } catch {
-      toast.error('Could not read that file.')
     }
+    reader.readAsDataURL(file)
     e.target.value = ''
   }
 
@@ -124,10 +124,27 @@ export function AIAssistant() {
       return
     }
 
-    const userMsg: ChatMessage = {
-      role: 'user',
-      content: text || (pendingImage ? 'Please read this floor plan sketch.' : 'Please review the attached document.'),
+    const fallbackText = pendingImage
+      ? 'Please read this floor plan sketch.'
+      : pendingDoc
+        ? 'Please review the attached document.'
+        : ''
+    const content: ContentBlock[] = [{ type: 'text', text: text || fallbackText }]
+    if (pendingImage) {
+      content.push({
+        type: 'image',
+        source: { type: 'base64', media_type: pendingImage.mediaType || 'image/png', data: pendingImage.data },
+      })
     }
+    if (pendingDoc) {
+      content.push({
+        type: 'document',
+        source: { type: 'base64', media_type: pendingDoc.mediaType || 'application/pdf', data: pendingDoc.data },
+        title: pendingDoc.name,
+      })
+    }
+
+    const userMsg: ChatMessage = { role: 'user', content }
 
     addChatMessage(userMsg)
     setInput('')

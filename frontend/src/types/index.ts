@@ -65,6 +65,7 @@ export interface ChatMessage {
 export interface ContentBlock {
   type: 'text' | 'image' | 'document'
   text?: string
+  title?: string
   source?: {
     type: string
     media_type: string

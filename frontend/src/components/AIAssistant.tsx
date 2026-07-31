@@ -15,6 +15,26 @@ const quickPrompts = [
   { label: 'Calculate stamp duty', text: 'How is stamp duty calculated?' },
 ]
 
+const SUPPORTED_DOC_MEDIA = new Set([
+  'application/pdf',
+  'text/plain',
+  'text/markdown',
+  'text/csv',
+  'application/json',
+  'text/html',
+  'text/xml',
+])
+
+const TEXT_MEDIA_BY_EXT: Record<string, string> = {
+  '.txt': 'text/plain',
+  '.md': 'text/markdown',
+  '.csv': 'text/csv',
+  '.json': 'application/json',
+  '.html': 'text/html',
+  '.htm': 'text/html',
+  '.xml': 'text/xml',
+}
+
 const greeting: ChatMessage = {
   role: 'assistant',
   content: 'Hello! I am LAVA, Ghana\'s AI-powered land valuation assistant. I am trained on GhIS valuation standards, Ghana Land Act 2020, Stamp Duty Act, and Market Comparison Analysis methodology - with direct access to the verified LAVA land transaction database.\n\nAsk me about land values, comparable sales, stamp duty, or valuation methodology.',
@@ -99,6 +119,15 @@ export function AIAssistant() {
       toast.error('File too large (max 8MB).')
       return
     }
+    const ext = file.name.split('.').pop()?.toLowerCase() || ''
+    let mediaType = file.type || ''
+    if (!SUPPORTED_DOC_MEDIA.has(mediaType)) {
+      mediaType = TEXT_MEDIA_BY_EXT['.' + ext] || ''
+    }
+    if (!SUPPORTED_DOC_MEDIA.has(mediaType)) {
+      toast.error('Unsupported file. Chat accepts PDF and text formats (txt, md, csv, json, html). Use the image button for photos.')
+      return
+    }
     const reader = new FileReader()
     reader.onload = (ev) => {
       const dataUrl = ev.target?.result as string
@@ -106,7 +135,7 @@ export function AIAssistant() {
         type: 'document',
         name: file.name,
         data: dataUrl.split(',')[1],
-        mediaType: file.type || 'application/octet-stream',
+        mediaType,
         kind: 'document',
       })
     }
@@ -330,7 +359,7 @@ export function AIAssistant() {
             <button className="attachBtn" title="Attach a floor plan sketch" onClick={() => fileInputRef.current?.click()}>
               <Image size={16} />
             </button>
-            <button className="attachBtn" title="Attach a document (PDF, Word, or text)" onClick={() => docInputRef.current?.click()}>
+            <button className="attachBtn" title="Attach a document (PDF or text)" onClick={() => docInputRef.current?.click()}>
               <FileText size={16} />
             </button>
             <textarea
@@ -357,7 +386,7 @@ export function AIAssistant() {
       </div>
 
       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageAttach} />
-      <input ref={docInputRef} type="file" accept=".pdf,.docx,.doc,.txt" className="hidden" onChange={handleDocAttach} />
+      <input ref={docInputRef} type="file" accept=".pdf,.txt,.md,.csv,.json,.html,.xml" className="hidden" onChange={handleDocAttach} />
 
       {showUpgradeBanner && !user && (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="upgradeBanner">

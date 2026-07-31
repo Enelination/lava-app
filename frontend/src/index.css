@@ -156,56 +156,57 @@
     width: 100%;
   }
 
-  /* ---------- Landing (Festland-inspired) ---------- */
+  /* ---------- Landing (Festland layout, dark theme, one view) ---------- */
   .landing {
-    background: var(--cream);
-    color: var(--ink);
-    min-height: 100vh;
+    background: var(--deep);
+    color: #fff;
+    height: 100vh;
+    overflow: hidden;
     position: relative;
+    display: flex;
+    flex-direction: column;
   }
   .landingNav {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 30px;
-    padding: 22px 6vw;
-    position: sticky;
-    top: 0;
-    z-index: 40;
-    background: rgba(247, 245, 240, 0.82);
+    padding: 14px 6vw;
+    flex-shrink: 0;
+    background: rgba(6, 26, 44, 0.82);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   }
   .landingNav .logoWord {
-    color: var(--ink);
+    color: #fff;
   }
   .landingNav .logoSub {
-    color: var(--muted);
+    color: rgba(255, 255, 255, 0.5);
   }
   .landingNavLinks {
     display: flex;
     align-items: center;
-    gap: 28px;
+    gap: 26px;
     margin-left: auto;
-    margin-right: 28px;
+    margin-right: 26px;
   }
   .landingNavLinks button {
     background: none;
     border: none;
     cursor: pointer;
     font-family: 'DM Mono', monospace;
-    font-size: 11px;
+    font-size: 10px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: rgba(255, 255, 255, 0.6);
     padding: 4px 0;
     border-bottom: 1px solid transparent;
     transition: color 0.2s, border-color 0.2s;
   }
   .landingNavLinks button:hover {
-    color: var(--ink);
-    border-color: var(--ink);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.6);
   }
   .landingNav .navCta {
     border-bottom: none;
@@ -213,20 +214,25 @@
   }
   .landingHero {
     max-width: 1180px;
+    width: 100%;
     margin: 0 auto;
-    padding: 132px 6vw 84px;
-    position: relative;
+    padding: 44px 6vw 34px;
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
   .eyebrow {
     display: inline-flex;
     align-items: center;
     gap: 10px;
     font-family: 'DM Mono', monospace;
-    font-size: 11px;
+    font-size: 10px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 42px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 22px;
   }
   .eyebrow i {
     width: 7px;
@@ -235,17 +241,17 @@
     display: inline-block;
   }
   .landingHero h1 {
-    font-size: clamp(56px, 8vw, 112px);
-    line-height: 0.98;
+    font-size: clamp(38px, 5.2vw, 66px);
+    line-height: 1.02;
     font-weight: 500;
     letter-spacing: -0.045em;
     max-width: 1000px;
-    margin-bottom: 44px;
+    margin-bottom: 26px;
   }
   .heroLineMask {
     display: block;
     overflow: hidden;
-    padding-bottom: 0.09em;
+    padding-bottom: 0.08em;
   }
   .heroLine {
     display: block;
@@ -254,20 +260,21 @@
     font-family: 'Playfair Display', Georgia, serif;
     font-style: italic;
     font-weight: 500;
+    color: var(--gold);
   }
   .landingHero p {
-    font-size: 17px;
-    line-height: 1.65;
-    color: var(--muted);
-    max-width: 560px;
-    margin-bottom: 48px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.65);
+    max-width: 520px;
+    margin-bottom: 28px;
   }
   .landingActions {
     display: flex;
     align-items: center;
-    gap: 36px;
+    gap: 30px;
     flex-wrap: wrap;
-    margin-bottom: 96px;
+    margin-bottom: 30px;
   }
   .landingLink {
     background: none;
@@ -277,33 +284,33 @@
     align-items: center;
     gap: 10px;
     font-family: 'DM Mono', monospace;
-    font-size: 12px;
+    font-size: 11px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--ink);
-    padding: 0 0 8px;
-    border-bottom: 1px solid rgba(9, 35, 58, 0.35);
+    color: #fff;
+    padding: 0 0 7px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.35);
     transition: gap 0.25s ease, border-color 0.25s ease;
   }
   .landingLink:hover {
     gap: 16px;
-    border-color: var(--ink);
+    border-color: #fff;
   }
   .landingLink.big {
-    font-size: 13px;
+    font-size: 12px;
   }
   .trustBar {
     display: flex;
     align-items: center;
-    gap: 48px;
+    gap: 40px;
     flex-wrap: wrap;
-    padding-top: 28px;
-    border-top: 1px solid rgba(9, 35, 58, 0.16);
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: 9px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: rgba(255, 255, 255, 0.45);
   }
   .trustBar span {
     display: inline-flex;
@@ -311,55 +318,57 @@
     gap: 8px;
   }
   .trustBar b {
-    color: var(--ink);
+    color: var(--gold);
     font-weight: 500;
   }
   .landingFeatures {
     max-width: 1180px;
+    width: 100%;
     margin: 0 auto;
-    padding: 60px 6vw 150px;
+    padding: 32px 6vw 30px;
+    flex-shrink: 0;
   }
   .landingFeatures h2 {
     font-family: 'Playfair Display', Georgia, serif;
     font-style: italic;
     font-weight: 500;
-    font-size: clamp(26px, 3.4vw, 38px);
-    line-height: 1.15;
-    color: var(--ink);
+    font-size: 19px;
+    line-height: 1.2;
+    color: rgba(255, 255, 255, 0.55);
     max-width: 660px;
-    margin-bottom: 72px;
+    margin-bottom: 26px;
   }
   .featureGrid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 48px;
-    border-top: 1px solid rgba(9, 35, 58, 0.16);
+    gap: 36px;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
   }
   .feature {
-    padding-top: 26px;
+    padding-top: 16px;
   }
   .featureIndex {
     font-family: 'DM Mono', monospace;
-    font-size: 11px;
+    font-size: 10px;
     color: var(--gold);
-    margin-bottom: 18px;
+    margin-bottom: 10px;
   }
   .feature h3 {
-    font-size: 21px;
+    font-size: 16px;
     font-weight: 600;
     letter-spacing: -0.02em;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
   }
   .feature p {
-    font-size: 14px;
-    line-height: 1.6;
-    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.55);
   }
   .featureArrow {
     display: inline-block;
-    margin-top: 24px;
-    font-size: 18px;
-    color: var(--ink);
+    margin-top: 12px;
+    font-size: 15px;
+    color: #fff;
     opacity: 0;
     transform: translateX(-8px);
     transition: opacity 0.25s ease, transform 0.25s ease;
@@ -369,38 +378,48 @@
     transform: translateX(0);
   }
   .landingFooter {
-    border-top: 1px solid var(--line);
-    background: var(--paper);
+    flex-shrink: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
   .landingFooterCta {
     max-width: 1180px;
+    width: 100%;
     margin: 0 auto;
-    padding: 120px 6vw 110px;
+    padding: 18px 6vw;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .landingFooterCta .eyebrow {
+    margin-bottom: 0;
   }
   .landingFooterCta h2 {
-    font-size: clamp(44px, 6vw, 84px);
-    line-height: 0.98;
+    font-size: 24px;
+    line-height: 1;
     font-weight: 500;
-    letter-spacing: -0.04em;
-    margin-bottom: 44px;
+    letter-spacing: -0.02em;
+    margin-bottom: 0;
   }
   .landingFooterCta h2 em {
     font-family: 'Playfair Display', Georgia, serif;
     font-style: italic;
     font-weight: 500;
+    color: var(--gold);
   }
   .landingFooterBar {
-    border-top: 1px solid var(--line);
-    padding: 26px 6vw;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 6vw;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 16px;
     flex-wrap: wrap;
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: 9px;
     letter-spacing: 0.04em;
-    color: var(--muted);
+    color: rgba(255, 255, 255, 0.4);
   }
 
   .logoMark {
@@ -1826,14 +1845,18 @@
     max-width: 100%;
     height: auto;
   }
+  .landing {
+    height: auto;
+    overflow: visible;
+  }
   .landingNav {
-    padding: 16px 5vw;
+    padding: 14px 5vw;
   }
   .landingNav .logoSub {
     display: none;
   }
   .landingHero {
-    padding: 60px 5vw 50px;
+    padding: 44px 5vw 30px;
   }
   .landingActions {
     flex-direction: column;
@@ -1843,7 +1866,11 @@
     display: none;
   }
   .landingHero h1 {
-    font-size: clamp(44px, 12vw, 64px);
+    font-size: clamp(40px, 12vw, 60px);
+  }
+  .landingFooterCta {
+    flex-direction: column;
+    align-items: flex-start;
   }
   .landingFooterBar {
     flex-direction: column;
@@ -1852,6 +1879,39 @@
   }
   .welcome h1 {
     font-size: 30px;
+  }
+}
+
+@media (max-height: 780px) and (min-width: 641px) {
+  .landingHero {
+    padding: 26px 6vw 20px;
+  }
+  .landingHero h1 {
+    font-size: clamp(34px, 4.6vw, 54px);
+    margin-bottom: 18px;
+  }
+  .landingHero p {
+    margin-bottom: 18px;
+  }
+  .landingActions {
+    margin-bottom: 18px;
+  }
+  .landingFeatures {
+    padding: 22px 6vw 20px;
+  }
+  .landingFeatures h2 {
+    font-size: 16px;
+    margin-bottom: 18px;
+  }
+  .feature h3 {
+    font-size: 15px;
+  }
+}
+
+@media (max-height: 600px) and (min-width: 641px) {
+  .landing {
+    height: auto;
+    overflow: visible;
   }
 }
 

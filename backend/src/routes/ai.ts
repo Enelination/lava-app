@@ -1,14 +1,12 @@
 import { Router, Request, Response } from 'express'
-import { getDb } from '../lib/database.js'
-import { authenticate } from '../middleware/auth.js'
+import { selectRows, countRows } from '../lib/supabase.js'
 
 const router = Router()
 
-router.get('/status', (_req: Request, res: Response) => {
+router.get('/status', async (_req: Request, res: Response) => {
   try {
-    const db = getDb()
-    const count = (db.prepare('SELECT COUNT(*) as c FROM submissions WHERE status = ?').get('Verified') as any).c
-    res.json({ verifiedRecords: count })
+    const verifiedRecords = await countRows('submissions', { status: 'Verified' })
+    res.json({ verifiedRecords })
   } catch (err: any) {
     res.status(500).json({ error: err.message })
   }
@@ -17,22 +15,26 @@ router.get('/status', (_req: Request, res: Response) => {
 router.post('/chat', async (req: Request, res: Response) => {
   try {
     const { messages, isPublic } = req.body
-    const db = getDb()
-    const setting = db.prepare('SELECT value FROM settings WHERE key = ?').get('claude_api_key') as any
-    const claudeKey = setting?.value || ''
+
+    const settings = await selectRows('settings', { where: { key: 'claude_api_key' }, select: 'value' })
+    const claudeKey = settings[0]?.value || ''
 
     if (!claudeKey) {
       return res.status(400).json({ error: 'Claude API key not configured. Go to Settings to add it.' })
     }
 
-    const verifiedRecs = db.prepare('SELECT * FROM submissions WHERE status = ? ORDER BY submitted_at DESC LIMIT 20').get('Verified') as any[]
+    const verifiedRecs = await selectRows('submissions', {
+      where: { status: 'Verified' },
+      order: 'submitted_at.desc',
+      limit: 20,
+    })
     const dbCtx = verifiedRecs.length
       ? verifiedRecs.map((r: any) =>
           `- ${r.community}, ${r.district || ''}, ${r.region} | ${r.property_type === 'Developed' ? 'DEVELOPED' : 'LAND'} | ${r.land_size || '?'} ${r.unit || ''} | ${r.land_use} | ${r.tenure_type}${r.property_type === 'Developed' ? ` | ${r.bedrooms ? r.bedrooms + ' bed' : ''}${r.bathrooms ? ', ' + r.bathrooms + ' bath' : ''}${r.storeys ? ', ' + r.storeys : ''}${r.floor_area ? ', ' + r.floor_area + ' sq.m' : ''}${r.building_age ? ', ' + r.building_age + 'yrs' : ''}${r.condition ? ', ' + r.condition : ''}` : ''} | GHS ${Number(r.price).toLocaleString()} | ${r.transaction_date || 'No date'} | Trust: ${r.trust_score}`
         ).join('\n')
       : 'No verified records yet.'
 
-    const kbDocs = db.prepare('SELECT * FROM knowledge_base').all() as any[]
+    const kbDocs = await selectRows('knowledge_base')
     const kbCtx = kbDocs.length
       ? '\n\nKNOWLEDGE BASE DOCUMENTS:\n' + kbDocs.map((d: any) => `--- ${d.name} ---\n${d.content.substring(0, 4000)}`).join('\n\n')
       : ''

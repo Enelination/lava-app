@@ -1,49 +1,35 @@
 import { Router, Request, Response } from 'express'
 import { v4 as uuid } from 'uuid'
-import { getDb } from '../lib/database.js'
+import { selectRows, countRows, insertRow, updateRows } from '../lib/supabase.js'
 import { authenticate } from '../middleware/auth.js'
 
 const router = Router()
 
-router.get('/', (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
-    const db = getDb()
     const { status, limit, offset } = req.query
-    let query = 'SELECT * FROM submissions'
-    const params: any[] = []
-
-    if (status && status !== 'all') {
-      query += ' WHERE status = ?'
-      params.push(status)
-    }
-
-    query += ' ORDER BY submitted_at DESC'
-
-    if (limit) {
-      query += ' LIMIT ?'
-      params.push(parseInt(limit as string))
-    }
-    if (offset) {
-      query += ' OFFSET ?'
-      params.push(parseInt(offset as string))
-    }
-
-    const rows = db.prepare(query).all(...params)
+    const where = status && status !== 'all' ? { status: String(status) } : {}
+    const rows = await selectRows('submissions', {
+      where,
+      order: 'submitted_at.desc',
+      limit: limit ? parseInt(limit as string) : undefined,
+      offset: offset ? parseInt(offset as string) : undefined,
+    })
     res.json(rows)
   } catch (err: any) {
     res.status(500).json({ error: err.message })
   }
 })
 
-router.get('/stats', (_req: Request, res: Response) => {
+router.get('/stats', async (_req: Request, res: Response) => {
   try {
-    const db = getDb()
-    const total = (db.prepare('SELECT COUNT(*) as c FROM submissions').get() as any).c
-    const verified = (db.prepare('SELECT COUNT(*) as c FROM submissions WHERE status = ?').get('Verified') as any).c
-    const pending = (db.prepare('SELECT COUNT(*) as c FROM submissions WHERE status = ?').get('Pending') as any).c
-    const flagged = (db.prepare('SELECT COUNT(*) as c FROM submissions WHERE status = ?').get('Flagged') as any).c
-    const rejected = (db.prepare('SELECT COUNT(*) as c FROM submissions WHERE status = ?').get('Rejected') as any).c
-    const regions = (db.prepare('SELECT COUNT(DISTINCT region) as c FROM submissions').get() as any).c
+    const total = await countRows('submissions')
+    const verified = await countRows('submissions', { status: 'Verified' })
+    const pending = await countRows('submissions', { status: 'Pending' })
+    const flagged = await countRows('submissions', { status: 'Flagged' })
+    const rejected = await countRows('submissions', { status: 'Rejected' })
+    const regionRows = await selectRows('submissions', { select: 'region' })
+    const regions = new Set(regionRows.map((r) => r.region).filter(Boolean)).size
 
     res.json({ total, verified, pending, flagged, rejected, regions })
   } catch (err: any) {
@@ -51,61 +37,72 @@ router.get('/stats', (_req: Request, res: Response) => {
   }
 })
 
-router.post('/', authenticate, (req: Request, res: Response) => {
+router.post('/', authenticate, async (req: Request, res: Response) => {
   try {
-    const db = getDb()
     const { userId } = (req as any).user
     const id = uuid()
     const data = req.body
 
-    db.prepare(`INSERT INTO submissions (id, property_type, region, district, community, gps_coordinates, land_size, unit, land_use, tenure_type, description, bedrooms, bathrooms, storeys, floor_area, building_age, condition, transaction_type, price, transaction_date, source, surveyor_name, licence_number, organisation, email, status, trust_score, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
-      id, data.property_type || 'Land', data.region || '', data.district || '', data.community || '',
-      data.gps_coordinates || '', data.land_size || null, data.unit || 'Acres', data.land_use || '',
-      data.tenure_type || '', data.description || '', data.bedrooms || null, data.bathrooms || null,
-      data.storeys || null, data.floor_area || null, data.building_age || null, data.condition || null,
-      data.transaction_type || 'Sale', data.price || 0, data.transaction_date || null, data.source || 'Direct transaction',
-      data.surveyor_name || '', data.licence_number || '', data.organisation || '', data.email || '',
-      'Pending', 'Medium', userId
-    )
+    const row = await insertRow('submissions', {
+      id,
+      property_type: data.property_type || 'Land',
+      region: data.region || '',
+      district: data.district || '',
+      community: data.community || '',
+      gps_coordinates: data.gps_coordinates || '',
+      land_size: data.land_size || null,
+      unit: data.unit || 'Acres',
+      land_use: data.land_use || '',
+      tenure_type: data.tenure_type || '',
+      description: data.description || '',
+      bedrooms: data.bedrooms || null,
+      bathrooms: data.bathrooms || null,
+      storeys: data.storeys || null,
+      floor_area: data.floor_area || null,
+      building_age: data.building_age || null,
+      condition: data.condition || null,
+      transaction_type: data.transaction_type || 'Sale',
+      price: data.price || 0,
+      transaction_date: data.transaction_date || null,
+      source: data.source || 'Direct transaction',
+      surveyor_name: data.surveyor_name || '',
+      licence_number: data.licence_number || '',
+      organisation: data.organisation || '',
+      email: data.email || '',
+      status: 'Pending',
+      trust_score: 'Medium',
+      user_id: userId,
+      submitted_at: new Date().toISOString(),
+    })
 
-    const submission = db.prepare('SELECT * FROM submissions WHERE id = ?').get(id)
-    res.status(201).json(submission)
+    res.status(201).json(row)
   } catch (err: any) {
     res.status(500).json({ error: err.message })
   }
 })
 
-router.patch('/:id', authenticate, (req: Request, res: Response) => {
+router.patch('/:id', authenticate, async (req: Request, res: Response) => {
   try {
-    const db = getDb()
     const { id } = req.params
     const { status, trust_score } = req.body
 
-    const existing = db.prepare('SELECT id FROM submissions WHERE id = ?').get(id)
-    if (!existing) return res.status(404).json({ error: 'Submission not found' })
-
-    const updates: string[] = []
-    const params: any[] = []
-
+    const updates: Record<string, unknown> = {}
     if (status) {
-      updates.push('status = ?')
-      params.push(status)
-      if (status === 'Verified') {
-        updates.push('verified_at = datetime(\'now\')')
-      }
+      updates.status = status
+      if (status === 'Verified') updates.verified_at = new Date().toISOString()
     }
     if (trust_score) {
-      updates.push('trust_score = ?')
-      params.push(trust_score)
+      updates.trust_score = trust_score
     }
 
-    if (updates.length === 0) return res.status(400).json({ error: 'No fields to update' })
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: 'No fields to update' })
+    }
 
-    params.push(id)
-    db.prepare(`UPDATE submissions SET ${updates.join(', ')} WHERE id = ?`).run(...params)
+    const rows = await updateRows('submissions', { id }, updates)
+    if (!rows.length) return res.status(404).json({ error: 'Submission not found' })
 
-    const updated = db.prepare('SELECT * FROM submissions WHERE id = ?').get(id)
-    res.json(updated)
+    res.json(rows[0])
   } catch (err: any) {
     res.status(500).json({ error: err.message })
   }

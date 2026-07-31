@@ -8,7 +8,7 @@ import submissionsRoutes from './routes/submissions.js'
 import aiRoutes from './routes/ai.js'
 import knowledgeBaseRoutes from './routes/knowledgeBase.js'
 import settingsRoutes from './routes/settings.js'
-import { getDb } from './lib/database.js'
+import { initSupabase } from './lib/supabase.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -21,8 +21,14 @@ console.log('__dirname:', __dirname)
 app.use(cors())
 app.use(express.json({ limit: '10mb' }))
 
-getDb()
-console.log('Database loaded.')
+async function startSupabase(): Promise<void> {
+  const ok = await initSupabase().catch(() => false)
+  if (ok) return
+  const timer = setInterval(async () => {
+    if (await initSupabase().catch(() => false)) clearInterval(timer)
+  }, 45000)
+}
+startSupabase()
 
 app.use('/api/auth', authRoutes)
 app.use('/api/submissions', submissionsRoutes)

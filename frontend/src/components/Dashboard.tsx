@@ -3,9 +3,11 @@ import { motion } from 'framer-motion'
 import { RefreshCw } from 'lucide-react'
 import { submissions as submissionsApi } from '../lib/api'
 import { useApp } from '../store/appStore'
+import { useAuth } from '../store/authStore'
 import { formatCurrency, formatDate } from '../lib/utils'
 
 export function Dashboard() {
+  const { user } = useAuth()
   const { stats, setStats, submissions, setSubmissions, setActivePage } = useApp()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -38,7 +40,7 @@ export function Dashboard() {
       <div className="pageHead">
         <div className="welcome">
           <div className="crumb">LAVA Workspace</div>
-          <h1>Good day, <em>{'welcome back.'}</em></h1>
+          <h1>Good day, <em>{user ? user.name.split(' ')[0] : 'welcome back.'}</em></h1>
           <p>Live overview of the LAVA land transaction database.</p>
         </div>
         <button onClick={loadData} disabled={loading} className="button outline flex-shrink-0">

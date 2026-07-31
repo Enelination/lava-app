@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Eye, EyeOff, Save, KeyRound, User as UserIcon } from 'lucide-react'
+import { Eye, EyeOff, Save, KeyRound, User as UserIcon, Lock } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuth } from '../store/authStore'
 import { auth as authApi } from '../lib/api'
 import { getRoleLabel } from '../lib/utils'
+import { AuthModal } from './AuthModal'
 
 export function Profile() {
   const { user, setUser } = useAuth()
@@ -19,6 +20,7 @@ export function Profile() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPw, setShowPw] = useState(false)
   const [changing, setChanging] = useState(false)
+  const [showAuth, setShowAuth] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -28,6 +30,40 @@ export function Profile() {
       setOrganisation(user.organisation || '')
     }
   }, [user])
+
+  if (!user) {
+    return (
+      <div>
+        <div className="pageHead">
+          <div className="welcome">
+            <div className="crumb">Account</div>
+            <h1>Profile.</h1>
+            <p>Sign in to manage your personal details and security.</p>
+          </div>
+        </div>
+
+        <div className="panel settingsCard" style={{ maxWidth: 640 }}>
+          <div className="settingsHead">
+            <div className="settingsHeadIcon"><Lock size={17} /></div>
+            <div>
+              <h2>Guest explorer</h2>
+              <p>You're browsing LAVA without an account.</p>
+            </div>
+          </div>
+          <div className="settingsBody">
+            <p className="text-muted mb-4">
+              Profile updates and password changes are only available to signed-in users.
+            </p>
+            <button className="button dark" onClick={() => setShowAuth(true)}>
+              Sign in to your account
+            </button>
+          </div>
+        </div>
+
+        {showAuth && <AuthModal initialTab={1} onClose={() => setShowAuth(false)} />}
+      </div>
+    )
+  }
 
   const inputCls = 'w-full border border-line rounded-sm2 bg-paper px-3 py-2.5 text-xs text-ink outline-none focus:border-muted transition-colors placeholder:text-[#b0bcc3]'
 

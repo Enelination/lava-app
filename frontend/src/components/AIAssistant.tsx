@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { Image, FileText, Loader2 } from 'lucide-react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import toast from 'react-hot-toast'
 import { useAuth } from '../store/authStore'
 import { useApp } from '../store/appStore'
@@ -136,36 +138,38 @@ export function AIAssistant() {
 
   const renderContent = (msg: ChatMessage) => {
     const content = typeof msg.content === 'string' ? msg.content : msg.content.map((b: any) => b.text || '').join(' ')
-    const parts = content.split(/(```svg[\s\S]*?```)/g)
 
-    return parts.map((part, i) => {
-      if (part.startsWith('```svg')) {
-        const svg = part.replace(/```svg\n?/, '').replace(/```$/, '').trim()
-        if (svg.includes('<svg')) {
-          return (
-            <div key={i} className="mt-3">
-              <div className="font-mono text-[9px] uppercase tracking-[0.09em] text-muted mb-2">
-                Redrawn floor plan
-              </div>
-              <div dangerouslySetInnerHTML={{ __html: svg }} />
-            </div>
-          )
-        }
-      }
-      if (part.trim()) {
-        return (
-          <div key={i} className="whitespace-pre-wrap break-words">
-            {part.split('\n').map((line, j) => (
-              <span key={j}>
-                {line}
-                {j < part.split('\n').length - 1 && <br />}
-              </span>
-            ))}
-          </div>
-        )
-      }
-      return null
-    })
+    return (
+      <div className="md-prose">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            pre: ({ children }) => <>{children}</>,
+            code: ({ className, children }) => {
+              if (/language-svg/.test(className || '')) {
+                const svg = String(children).trim()
+                if (svg.includes('<svg')) {
+                  return (
+                    <div className="mt-3">
+                      <div className="font-mono text-[9px] uppercase tracking-[0.09em] text-muted mb-2">
+                        Redrawn floor plan
+                      </div>
+                      <div dangerouslySetInnerHTML={{ __html: svg }} />
+                    </div>
+                  )
+                }
+              }
+              return <code className={className}>{children}</code>
+            },
+            a: ({ href, children }) => (
+              <a href={href} target="_blank" rel="noreferrer noopener">{children}</a>
+            ),
+          }}
+        >
+          {content}
+        </ReactMarkdown>
+      </div>
+    )
   }
 
   return (

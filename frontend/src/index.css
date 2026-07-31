@@ -885,6 +885,81 @@
     background: var(--deep);
     color: #fff;
   }
+  .bubble .md-prose > *:first-child { margin-top: 0; }
+  .bubble .md-prose > *:last-child { margin-bottom: 0; }
+  .bubble .md-prose p { margin: 8px 0; }
+  .bubble .md-prose h1,
+  .bubble .md-prose h2,
+  .bubble .md-prose h3,
+  .bubble .md-prose h4 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    margin: 16px 0 6px;
+    line-height: 1.3;
+  }
+  .bubble .md-prose h1 { font-size: 18px; }
+  .bubble .md-prose h2 { font-size: 16px; }
+  .bubble .md-prose h3 { font-size: 14px; }
+  .bubble .md-prose h4 { font-size: 13px; }
+  .bubble .md-prose ul,
+  .bubble .md-prose ol { margin: 8px 0; padding-left: 20px; }
+  .bubble .md-prose li { margin: 3px 0; }
+  .bubble .md-prose li > ul,
+  .bubble .md-prose li > ol { margin: 2px 0; }
+  .bubble .md-prose strong { font-weight: 700; }
+  .bubble .md-prose blockquote {
+    margin: 10px 0;
+    padding: 2px 0 2px 12px;
+    border-left: 3px solid var(--gold);
+    color: var(--muted);
+  }
+  .bubble .md-prose hr { border: 0; border-top: 1px solid var(--line); margin: 14px 0; }
+  .bubble .md-prose code {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    background: rgba(9, 35, 58, 0.06);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+  .bubble .md-prose pre {
+    margin: 10px 0;
+    padding: 10px 12px;
+    background: var(--deep);
+    color: #e9f3ed;
+    border-radius: 6px;
+    overflow-x: auto;
+  }
+  .bubble .md-prose pre code {
+    background: none;
+    padding: 0;
+    color: inherit;
+  }
+  .bubble .md-prose table {
+    border-collapse: collapse;
+    margin: 10px 0;
+    font-size: 11px;
+    width: 100%;
+  }
+  .bubble .md-prose th,
+  .bubble .md-prose td {
+    border: 1px solid var(--line);
+    padding: 5px 8px;
+    text-align: left;
+  }
+  .bubble .md-prose th {
+    background: var(--mint);
+    font-weight: 700;
+  }
+  .bubble .md-prose a {
+    color: var(--deep);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .bubble .md-prose input[type='checkbox'] { margin-right: 6px; }
+  .bubble.user .md-prose a { color: var(--gold); }
+  .bubble.user .md-prose code { background: rgba(255, 255, 255, 0.12); }
+  .bubble.user .md-prose blockquote { color: #c7dfd2; }
+  .bubble.user .md-prose th { background: rgba(255, 255, 255, 0.1); }
   .suggestions {
     display: flex;
     flex-wrap: wrap;

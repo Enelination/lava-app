@@ -18,11 +18,13 @@ export function getDb(): Database.Database {
     fs.mkdirSync(dir, { recursive: true })
   }
 
+  console.log('Opening database at', DB_PATH)
   db = new Database(DB_PATH)
   db.pragma('journal_mode = WAL')
   db.pragma('foreign_keys = ON')
   initSchema()
   seedData()
+  console.log('Database ready at', DB_PATH)
   return db
 }
 

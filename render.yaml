@@ -1,14 +1,11 @@
 services:
   - type: web
     name: lava-app
-    runtime: node
+    env: docker
+    dockerfilePath: ./Dockerfile
     plan: free
-    buildCommand: npm ci && npm rebuild better-sqlite3 --build-from-source && npm run build
-    startCommand: npm start
     healthCheckPath: /api/health
     envVars:
-      - key: NODE_VERSION
-        value: 20
       # Set these in the Render dashboard (or paste values below).
       # CLAUDE_API_KEY is required for the AI assistant.
       - key: CLAUDE_API_KEY

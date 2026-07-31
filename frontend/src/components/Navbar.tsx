@@ -4,26 +4,26 @@ import { useAuth } from '../store/authStore'
 import { useApp } from '../store/appStore'
 import { useNavigate } from 'react-router-dom'
 import { getInitials, getRoleLabel, hasRole } from '../lib/utils'
-import { LogOut, X, Download } from 'lucide-react'
+import { LogOut, X, Download, CircleUserRound, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>
 }
 
-const tabs = [
+const tabs: { id: string; label: string; icon: React.ReactNode; minRole: string }[] = [
   { id: 'home', label: 'Overview', icon: '⌂', minRole: 'public' },
   { id: 'ai', label: 'LAVA Assistant', icon: '✦', minRole: 'public' },
   { id: 'sub', label: 'Submit Data', icon: '＋', minRole: 'surveyor' },
   { id: 'ver', label: 'Verify', icon: '✓', minRole: 'officer' },
   { id: 'kb', label: 'Knowledge Base', icon: '▤', minRole: 'admin' },
   { id: 'cfg', label: 'Settings', icon: '⚙', minRole: 'admin' },
-  { id: 'acct', label: 'Account', icon: '◉', minRole: 'public' },
+  { id: 'acct', label: 'Account', icon: <CircleUserRound size={15} />, minRole: 'public' },
 ]
 
 export function Navbar() {
   const { user, logout } = useAuth()
-  const { activePage, setActivePage } = useApp()
+  const { activePage, setActivePage, navCollapsed, setNavCollapsed } = useApp()
   const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [installEvt, setInstallEvt] = useState<BeforeInstallPromptEvent | null>(null)
@@ -68,7 +68,7 @@ export function Navbar() {
 
   return (
     <>
-      <aside className="sidebar hidden lg:flex">
+      <aside className={`sidebar hidden lg:flex ${navCollapsed ? 'collapsed' : ''}`}>
         <button
           onClick={() => go('home')}
           className="logoBox flex items-center gap-3 bg-transparent border-none cursor-pointer px-2 pb-6"
@@ -119,6 +119,15 @@ export function Navbar() {
             </button>
           )}
         </div>
+
+        <button
+          onClick={() => setNavCollapsed(!navCollapsed)}
+          title={navCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className="collapseBtn"
+        >
+          {navCollapsed ? <PanelLeftOpen size={15} /> : <PanelLeftClose size={15} />}
+          <span className="collapseLabel">{navCollapsed ? '' : 'Collapse'}</span>
+        </button>
       </aside>
 
       {/* Mobile top bar */}

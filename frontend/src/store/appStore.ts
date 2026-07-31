@@ -3,6 +3,7 @@ import type { Submission, DashboardStats, ChatMessage, PendingAttachment } from 
 
 interface AppState {
   activePage: string
+  navCollapsed: boolean
   submissions: Submission[]
   stats: DashboardStats | null
   chatMessages: ChatMessage[]
@@ -12,6 +13,7 @@ interface AppState {
   showUpgradeBanner: boolean
 
   setActivePage: (page: string) => void
+  setNavCollapsed: (collapsed: boolean) => void
   setSubmissions: (subs: Submission[]) => void
   setStats: (stats: DashboardStats) => void
   addChatMessage: (msg: ChatMessage) => void
@@ -24,6 +26,7 @@ interface AppState {
 
 export const useApp = create<AppState>((set) => ({
   activePage: 'home',
+  navCollapsed: typeof localStorage !== 'undefined' && localStorage.getItem('lava_nav_collapsed') === '1',
   submissions: [],
   stats: null,
   chatMessages: [
@@ -38,6 +41,10 @@ export const useApp = create<AppState>((set) => ({
   showUpgradeBanner: false,
 
   setActivePage: (page) => set({ activePage: page }),
+  setNavCollapsed: (collapsed) => {
+    localStorage.setItem('lava_nav_collapsed', collapsed ? '1' : '0')
+    set({ navCollapsed: collapsed })
+  },
   setSubmissions: (subs) => set({ submissions: subs }),
   setStats: (stats) => set({ stats }),
   addChatMessage: (msg) => set((s) => ({ chatMessages: [...s.chatMessages, msg] })),

@@ -458,6 +458,66 @@
     color: #71828b;
     margin-top: 2px;
   }
+  .collapseBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 12px;
+    margin-top: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 9px;
+    background: transparent;
+    color: #8da0b1;
+    cursor: pointer;
+    font-size: 12px;
+    transition: color 0.15s, background 0.15s;
+  }
+  .collapseBtn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .sidebar.collapsed {
+    width: 70px;
+    padding-left: 8px;
+    padding-right: 8px;
+    transition: width 0.2s ease;
+  }
+  .sidebar:not(.collapsed) {
+    transition: width 0.2s ease;
+  }
+  .sidebar.collapsed .workspace,
+  .sidebar.collapsed .supportText,
+  .sidebar.collapsed .navLabel,
+  .sidebar.collapsed .logoWord,
+  .sidebar.collapsed .logoSub,
+  .sidebar.collapsed .collapseLabel {
+    display: none;
+  }
+  .sidebar.collapsed .logoBox {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .sidebar.collapsed .navItem {
+    justify-content: center;
+    padding: 10px;
+  }
+  .sidebar.collapsed .navItem .navIcon {
+    width: auto;
+  }
+  .sidebar.collapsed .support {
+    justify-content: center;
+    padding: 10px 0;
+  }
+  .sidebar.collapsed .support button {
+    display: none;
+  }
+  .sidebar.collapsed .collapseBtn {
+    border: none;
+    padding: 8px 0;
+  }
 
   /* ---------- Topbar ---------- */
   .topbar {

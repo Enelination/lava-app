@@ -34,7 +34,7 @@ const pageNames: Record<string, string> = {
 
 export function AppLayout() {
   const { user } = useAuth()
-  const { activePage, setActivePage } = useApp()
+  const { activePage, setActivePage, navCollapsed } = useApp()
 
   useEffect(() => {
     if (!user) {
@@ -47,7 +47,7 @@ export function AppLayout() {
   return (
     <div className="min-h-screen bg-cream">
       <Navbar />
-      <div className="mainArea lg:ml-[246px] max-lg:pt-16">
+      <div className={`mainArea max-lg:pt-16 ${navCollapsed ? 'lg:ml-[70px]' : 'lg:ml-[246px]'}`}>
         <header className="topbar max-lg:hidden">
           <div className="topbarCrumb">
             LAVA <span className="mx-1.5 opacity-50">/</span> <b>{pageNames[activePage] || 'Overview'}</b>

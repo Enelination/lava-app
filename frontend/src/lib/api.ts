@@ -1,0 +1,105 @@
+import type { User, Submission, DashboardStats, KnowledgeDoc } from '../types'
+
+const BASE = '/api'
+
+function getToken(): string | null {
+  return localStorage.getItem('lava_token')
+}
+
+async function request<T>(
+  path: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const token = getToken()
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string>),
+  }
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+
+  const res = await fetch(`${BASE}${path}`, {
+    ...options,
+    headers,
+  })
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ error: 'Request failed' }))
+    throw new Error(body.error || `HTTP ${res.status}`)
+  }
+
+  return res.json()
+}
+
+export const auth = {
+  login: (data: { email?: string; licence_number?: string; password: string }) =>
+    request<{ token: string; user: User }>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  register: (data: { name: string; email: string; password: string; licence_number?: string; organisation?: string }) =>
+    request<{ token: string; user: User }>('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  me: () => request<{ user: User }>('/auth/me'),
+}
+
+export const submissions = {
+  list: (status?: string) => {
+    const params = status && status !== 'all' ? `?status=${status}` : ''
+    return request<Submission[]>(`/submissions${params}`)
+  },
+
+  stats: () => request<DashboardStats>('/submissions/stats'),
+
+  create: (data: Partial<Submission>) =>
+    request<Submission>('/submissions', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  update: (id: string, data: { status?: string; trust_score?: string }) =>
+    request<Submission>(`/submissions/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+}
+
+export const ai = {
+  status: () => request<{ verifiedRecords: number }>('/ai/status'),
+
+  chat: (messages: any[], isPublic: boolean) =>
+    request<any>('/ai/chat', {
+      method: 'POST',
+      body: JSON.stringify({ messages, isPublic }),
+    }),
+}
+
+export const knowledgeBase = {
+  list: () => request<KnowledgeDoc[]>('/knowledge-base'),
+
+  upload: (name: string, content: string) =>
+    request<KnowledgeDoc>('/knowledge-base/upload', {
+      method: 'POST',
+      body: JSON.stringify({ name, content }),
+    }),
+
+  delete: (id: string) =>
+    request<{ success: boolean }>(`/knowledge-base/${id}`, {
+      method: 'DELETE',
+    }),
+}
+
+export const settings = {
+  get: () => request<Record<string, string>>('/settings'),
+
+  update: (data: Record<string, string>) =>
+    request<{ success: boolean }>('/settings', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+}

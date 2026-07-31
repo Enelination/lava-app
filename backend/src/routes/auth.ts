@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
 import { v4 as uuid } from 'uuid'
-import { selectRows, insertRow } from '../lib/supabase.js'
+import { selectRows, insertRow, updateRows } from '../lib/supabase.js'
 import { signToken, authenticate } from '../middleware/auth.js'
 import type { User } from '../types.js'
 
@@ -86,6 +86,75 @@ router.post('/login', async (req: Request, res: Response) => {
     })
   } catch (err: any) {
     res.status(500).json({ error: err.message || 'Login failed' })
+  }
+})
+
+router.patch('/profile', authenticate, async (req: Request, res: Response) => {
+  try {
+    const { userId } = (req as any).user
+    const { name, email, licence_number, organisation } = req.body
+
+    const updates: Record<string, unknown> = {}
+    if (name !== undefined) {
+      if (!String(name).trim()) return res.status(400).json({ error: 'Name cannot be empty' })
+      updates.name = String(name).trim()
+    }
+    if (email !== undefined) {
+      const normalized = String(email).toLowerCase().trim()
+      if (!normalized) return res.status(400).json({ error: 'Email cannot be empty' })
+      const existing = await selectRows('users', { where: { email: normalized }, select: 'id' })
+      if (existing.length && existing[0].id !== userId) {
+        return res.status(409).json({ error: 'Email already in use' })
+      }
+      updates.email = normalized
+    }
+    if (licence_number !== undefined) {
+      updates.licence_number = licence_number ? String(licence_number).toUpperCase().trim() : null
+    }
+    if (organisation !== undefined) {
+      updates.organisation = organisation ? String(organisation).trim() : null
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: 'Nothing to update' })
+    }
+
+    const current = (await selectRows('users', { where: { id: userId } }))[0]
+    if (current && current.role === 'public' && updates.licence_number) {
+      updates.role = 'surveyor'
+    }
+
+    const rows = await updateRows('users', { id: userId }, updates)
+    const user = rows[0]
+    if (!user) return res.status(404).json({ error: 'User not found' })
+    const { password: _pw, ...safe } = user
+    res.json({ user: safe })
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Profile update failed' })
+  }
+})
+
+router.post('/change-password', authenticate, async (req: Request, res: Response) => {
+  try {
+    const { userId } = (req as any).user
+    const { current_password, new_password } = req.body
+    if (!current_password || !new_password) {
+      return res.status(400).json({ error: 'Current and new password are required' })
+    }
+    if (String(new_password).length < 6) {
+      return res.status(400).json({ error: 'New password must be at least 6 characters' })
+    }
+    const rows = await selectRows('users', { where: { id: userId } })
+    const user = rows[0]
+    if (!user) return res.status(404).json({ error: 'User not found' })
+    if (!bcrypt.compareSync(String(current_password), user.password)) {
+      return res.status(401).json({ error: 'Current password is incorrect' })
+    }
+    const hash = bcrypt.hashSync(String(new_password), 10)
+    await updateRows('users', { id: userId }, { password: hash })
+    res.json({ success: true })
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Password change failed' })
   }
 })
 

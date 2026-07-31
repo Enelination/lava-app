@@ -46,6 +46,18 @@ export const auth = {
     }),
 
   me: () => request<{ user: User }>('/auth/me'),
+
+  updateProfile: (data: { name?: string; email?: string; licence_number?: string | null; organisation?: string | null }) =>
+    request<{ user: User }>('/auth/profile', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+
+  changePassword: (current_password: string, new_password: string) =>
+    request<{ success: boolean }>('/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ current_password, new_password }),
+    }),
 }
 
 export const submissions = {

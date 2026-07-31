@@ -9,6 +9,7 @@ import { SubmitData } from './SubmitData'
 import { VerificationQueue } from './VerificationQueue'
 import { KnowledgeBase } from './KnowledgeBase'
 import { Settings } from './Settings'
+import { Profile } from './Profile'
 import { getInitials } from '../lib/utils'
 
 const pages: Record<string, React.FC> = {
@@ -18,6 +19,7 @@ const pages: Record<string, React.FC> = {
   ver: VerificationQueue,
   kb: KnowledgeBase,
   cfg: Settings,
+  acct: Profile,
 }
 
 const pageNames: Record<string, string> = {
@@ -27,6 +29,7 @@ const pageNames: Record<string, string> = {
   ver: 'Verification Queue',
   kb: 'Knowledge Base',
   cfg: 'Settings',
+  acct: 'Account',
 }
 
 export function AppLayout() {

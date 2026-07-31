@@ -18,6 +18,7 @@ const tabs = [
   { id: 'ver', label: 'Verify', icon: '✓', minRole: 'officer' },
   { id: 'kb', label: 'Knowledge Base', icon: '▤', minRole: 'admin' },
   { id: 'cfg', label: 'Settings', icon: '⚙', minRole: 'admin' },
+  { id: 'acct', label: 'Account', icon: '◉', minRole: 'public' },
 ]
 
 export function Navbar() {

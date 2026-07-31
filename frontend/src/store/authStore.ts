@@ -12,6 +12,7 @@ interface AuthState {
   loginByLicence: (licence: string, password: string) => Promise<void>
   register: (data: { name: string; email: string; password: string; licence_number?: string; organisation?: string }) => Promise<void>
   logout: () => void
+  setUser: (user: User) => void
   init: () => Promise<void>
 }
 
@@ -76,4 +77,6 @@ export const useAuth = create<AuthState>((set, get) => ({
     localStorage.removeItem('lava_token')
     set({ user: null, token: null })
   },
+
+  setUser: (user) => set({ user }),
 }))

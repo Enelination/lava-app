@@ -95,8 +95,8 @@ export function Profile() {
       toast.error('Fill in all password fields.')
       return
     }
-    if (newPassword.length < 6) {
-      toast.error('New password must be at least 6 characters.')
+    if (newPassword.length < 8) {
+      toast.error('New password must be at least 8 characters.')
       return
     }
     if (newPassword !== confirmPassword) {
@@ -222,7 +222,7 @@ export function Profile() {
                 type={showPw ? 'text' : 'password'}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="At least 6 characters"
+                placeholder="At least 8 characters"
                 className={`${inputCls} pr-10`}
                 autoComplete="new-password"
               />

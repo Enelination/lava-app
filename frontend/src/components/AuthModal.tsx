@@ -52,8 +52,8 @@ export function AuthModal({ initialTab, onClose }: Props) {
       setError('Please fill in all required fields.')
       return
     }
-    if (regPw.length < 6) {
-      setError('Password must be at least 6 characters.')
+    if (regPw.length < 8) {
+      setError('Password must be at least 8 characters.')
       return
     }
     setLoading(true)
@@ -171,7 +171,7 @@ export function AuthModal({ initialTab, onClose }: Props) {
               <input type="email" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} placeholder="your@email.com" className={inputCls} />
             </div>
             <div className="field">
-              <label>Password * (min 6 characters)</label>
+              <label>Password * (min 8 characters)</label>
               <div className="relative">
                 <input type={showPw ? 'text' : 'password'} value={regPw} onChange={(e) => setRegPw(e.target.value)} placeholder="Choose a password" className={`${inputCls} pr-10`} />
                 <button

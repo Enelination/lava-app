@@ -1,7 +1,10 @@
 import { Router, Request, Response } from 'express'
 import { v4 as uuid } from 'uuid'
 import { selectRows, countRows, insertRow, updateRows } from '../lib/supabase.js'
-import { authenticate } from '../middleware/auth.js'
+import { authenticate, requireRole } from '../middleware/auth.js'
+
+const VALID_STATUSES = ['Pending', 'Verified', 'Flagged', 'Rejected']
+const VALID_TRUST = ['High', 'Medium', 'Low']
 
 const router = Router()
 
@@ -37,11 +40,13 @@ router.get('/stats', async (_req: Request, res: Response) => {
   }
 })
 
-router.post('/', authenticate, async (req: Request, res: Response) => {
+router.post('/', authenticate, requireRole('surveyor', 'officer', 'admin'), async (req: Request, res: Response) => {
   try {
     const { userId } = (req as any).user
     const id = uuid()
     const data = req.body
+
+    const submitter = (await selectRows('users', { where: { id: userId }, select: 'name,licence_number,organisation,email' }))[0] || {}
 
     const row = await insertRow('submissions', {
       id,
@@ -65,10 +70,10 @@ router.post('/', authenticate, async (req: Request, res: Response) => {
       price: data.price || 0,
       transaction_date: data.transaction_date || null,
       source: data.source || 'Direct transaction',
-      surveyor_name: data.surveyor_name || '',
-      licence_number: data.licence_number || '',
-      organisation: data.organisation || '',
-      email: data.email || '',
+      surveyor_name: submitter.name || '',
+      licence_number: submitter.licence_number || '',
+      organisation: submitter.organisation || '',
+      email: submitter.email || '',
       status: 'Pending',
       trust_score: 'Medium',
       user_id: userId,
@@ -81,17 +86,23 @@ router.post('/', authenticate, async (req: Request, res: Response) => {
   }
 })
 
-router.patch('/:id', authenticate, async (req: Request, res: Response) => {
+router.patch('/:id', authenticate, requireRole('officer', 'admin'), async (req: Request, res: Response) => {
   try {
     const { id } = req.params
     const { status, trust_score } = req.body
 
     const updates: Record<string, unknown> = {}
-    if (status) {
+    if (status !== undefined) {
+      if (!VALID_STATUSES.includes(status)) {
+        return res.status(400).json({ error: 'Invalid status' })
+      }
       updates.status = status
       if (status === 'Verified') updates.verified_at = new Date().toISOString()
     }
-    if (trust_score) {
+    if (trust_score !== undefined) {
+      if (!VALID_TRUST.includes(trust_score)) {
+        return res.status(400).json({ error: 'Invalid trust score' })
+      }
       updates.trust_score = trust_score
     }
 

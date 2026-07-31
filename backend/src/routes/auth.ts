@@ -13,8 +13,8 @@ router.post('/register', async (req: Request, res: Response) => {
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'Name, email and password are required' })
     }
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Password must be at least 6 characters' })
+    if (password.length < 8) {
+      return res.status(400).json({ error: 'Password must be at least 8 characters' })
     }
 
     const existing = await selectRows('users', { where: { email: email.toLowerCase() }, select: 'id' })
@@ -141,8 +141,8 @@ router.post('/change-password', authenticate, async (req: Request, res: Response
     if (!current_password || !new_password) {
       return res.status(400).json({ error: 'Current and new password are required' })
     }
-    if (String(new_password).length < 6) {
-      return res.status(400).json({ error: 'New password must be at least 6 characters' })
+    if (String(new_password).length < 8) {
+      return res.status(400).json({ error: 'New password must be at least 8 characters' })
     }
     const rows = await selectRows('users', { where: { id: userId } })
     const user = rows[0]

@@ -134,6 +134,10 @@ const BUILTIN_DOCS = [
 async function seedUsers() {
   const count = await countRows('users')
   if (count > 0) return
+  if (process.env.SEED_DEMO_USERS !== '1') {
+    console.warn('Skipped demo user seeding (set SEED_DEMO_USERS=1 to enable).')
+    return
+  }
   const hash = bcrypt.hashSync('lava2025', 10)
   await upsertRows(
     'users',

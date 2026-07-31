@@ -1,5 +1,7 @@
 import express from 'express'
 import cors from 'cors'
+import helmet from 'helmet'
+import rateLimit from 'express-rate-limit'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -18,17 +20,58 @@ console.log('LAVA server starting…')
 console.log('Node version:', process.version)
 console.log('__dirname:', __dirname)
 
-app.use(cors())
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
+        imgSrc: ["'self'", 'data:', 'blob:'],
+        connectSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        frameAncestors: ["'none'"],
+        baseUri: ["'self'"],
+        formAction: ["'self'"],
+      },
+    },
+  })
+)
+
+const allowedOrigins = (process.env.APP_ORIGINS || '')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean)
+
+app.use((req, res, next) => {
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true)
+      const host = `${req.protocol}://${req.headers.host}`
+      const matches = (o: string | RegExp) => (o instanceof RegExp ? o.test(origin) : o === origin)
+      const pool: (string | RegExp)[] = allowedOrigins.length
+        ? allowedOrigins
+        : [/^https?:\/\/localhost:\d+$/, /\.onrender\.com$/, /\.vercel\.app$/]
+      callback(null, origin === host || pool.some(matches))
+    },
+  })(req, res, next)
+})
+
 app.use(express.json({ limit: '10mb' }))
 
-async function startSupabase(): Promise<void> {
-  const ok = await initSupabase().catch(() => false)
-  if (ok) return
-  const timer = setInterval(async () => {
-    if (await initSupabase().catch(() => false)) clearInterval(timer)
-  }, 45000)
+const tooMany = (_req: express.Request, res: express.Response) => {
+  res.status(429).json({ error: 'Too many requests. Please try again later.' })
 }
-startSupabase()
+
+const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 10, standardHeaders: 'draft-8', legacyHeaders: false, handler: tooMany })
+const registerLimiter = rateLimit({ windowMs: 60 * 60 * 1000, limit: 5, standardHeaders: 'draft-8', legacyHeaders: false, handler: tooMany })
+const chatLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 90, standardHeaders: 'draft-8', legacyHeaders: false, handler: tooMany })
+
+app.use('/api/auth/login', authLimiter)
+app.use('/api/auth/change-password', authLimiter)
+app.use('/api/auth/register', registerLimiter)
+app.use('/api/ai/chat', chatLimiter)
 
 app.use('/api/auth', authRoutes)
 app.use('/api/submissions', submissionsRoutes)

@@ -1,8 +1,15 @@
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
+import { randomBytes } from 'crypto'
 import type { JwtPayload } from '../types.js'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'lava-secret-key-2025-ghana'
+let JWT_SECRET: string = process.env.JWT_SECRET || ''
+if (!JWT_SECRET) {
+  JWT_SECRET = randomBytes(32).toString('hex')
+  console.warn(
+    'WARNING: JWT_SECRET not set. Generated an ephemeral secret — all sessions will be invalidated on every server restart. Set JWT_SECRET in production.'
+  )
+}
 
 export function signToken(payload: JwtPayload): string {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' })

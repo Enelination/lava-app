@@ -59,9 +59,15 @@ export function AppLayout() {
               </div>
               <div className="font-mono text-[9px] text-muted">{user?.licence_number || ''}</div>
             </div>
-            <div className="avatar" style={{ width: 32, height: 32, borderRadius: 8, fontSize: 10 }}>
-              {getInitials(user?.name || 'User')}
-            </div>
+            <button
+              onClick={() => setActivePage('acct')}
+              title="Account settings"
+              className="bg-transparent border-none cursor-pointer p-0"
+            >
+              <div className="avatar" style={{ width: 32, height: 32, borderRadius: 8, fontSize: 10 }}>
+                {getInitials(user?.name || 'User')}
+              </div>
+            </button>
           </div>
         </header>
         <main className="page">

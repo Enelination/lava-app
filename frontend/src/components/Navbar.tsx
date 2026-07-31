@@ -95,7 +95,13 @@ export function Navbar() {
         </nav>
 
         <div className="support">
-          <div className="avatar">{getInitials(user?.name || 'User')}</div>
+          <button
+            onClick={() => go('acct')}
+            title="Account settings"
+            className="bg-transparent border-none cursor-pointer p-0"
+          >
+            <div className="avatar">{getInitials(user?.name || 'User')}</div>
+          </button>
           <div className="supportText min-w-0">
             <div className="supportName">{user?.name?.split(' ')[0] || 'Guest'}</div>
             <div className="supportRole">{getRoleLabel(userRole)}</div>

@@ -339,8 +339,8 @@
   }
   .landingCta h2 em.ctaWord {
     display: inline-block;
-    width: 7.8em;
     vertical-align: bottom;
+    white-space: nowrap;
   }
   .landingCta h2 .ctaWordInner {
     display: block;

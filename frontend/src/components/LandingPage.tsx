@@ -3,7 +3,7 @@ import { AuthModal } from './AuthModal'
 import { useAuth } from '../store/authStore'
 import { useNavigate } from 'react-router-dom'
 
-const ctaWords = ['LAVA', 'INTELLIGENCE']
+const ctaWord = 'LAVA'
 
 const features = [
   {
@@ -26,10 +26,10 @@ export function LandingPage() {
   const navigate = useNavigate()
   const user = useAuth((s) => s.user)
 
-  const [ctaIdx, setCtaIdx] = useState(0)
+  const [ctaTick, setCtaTick] = useState(0)
 
   useEffect(() => {
-    const id = setInterval(() => setCtaIdx((i) => (i + 1) % ctaWords.length), 2400)
+    const id = setInterval(() => setCtaTick((t) => t + 1), 2400)
     return () => clearInterval(id)
   }, [])
 
@@ -117,8 +117,8 @@ export function LandingPage() {
         <h2>
           Just ask{' '}
           <em className="ctaWord">
-            <span key={ctaIdx} className="ctaWordInner">
-              {ctaWords[ctaIdx]}.
+            <span key={ctaTick} className="ctaWordInner">
+              {ctaWord}.
             </span>
           </em>
         </h2>

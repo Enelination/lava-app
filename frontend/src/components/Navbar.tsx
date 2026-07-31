@@ -70,7 +70,7 @@ export function Navbar() {
     <>
       <aside className={`sidebar hidden lg:flex ${navCollapsed ? 'collapsed' : ''}`}>
         <button
-          onClick={() => go('home')}
+          onClick={() => navigate('/')}
           className="logoBox flex items-center gap-3 bg-transparent border-none cursor-pointer px-2 pb-6"
         >
           <span className="logoMark">L</span>
@@ -138,7 +138,7 @@ export function Navbar() {
 
       {/* Mobile top bar */}
       <div className="lg:hidden fixed top-0 inset-x-0 z-40 bg-deep text-white px-4 h-16 flex items-center justify-between">
-        <button onClick={() => go('home')} className="flex items-center gap-2.5 bg-transparent border-none cursor-pointer">
+        <button onClick={() => navigate('/')} className="flex items-center gap-2.5 bg-transparent border-none cursor-pointer">
           <span className="logoMark" style={{ width: 30, height: 30, fontSize: 15 }}>L</span>
           <span className="logoWord" style={{ fontSize: 11 }}>LAVA</span>
         </button>

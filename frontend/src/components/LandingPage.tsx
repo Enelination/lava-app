@@ -101,6 +101,18 @@ export function LandingPage() {
         </div>
       </section>
 
+      <section className="landingCta">
+        <span className="eyebrow">
+          <i /> Clarity found?
+        </span>
+        <h2>
+          Just ask <em>LAVA.</em>
+        </h2>
+        <button className="button" onClick={() => openAuth(0)}>
+          Start a conversation <span>→</span>
+        </button>
+      </section>
+
       <footer className="landingFooter">
         <span>LAVA © 2026</span>
         <span>Built for the Ghana Institution of Surveyors</span>

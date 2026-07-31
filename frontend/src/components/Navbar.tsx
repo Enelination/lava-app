@@ -1,10 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../store/authStore'
 import { useApp } from '../store/appStore'
 import { useNavigate } from 'react-router-dom'
 import { getInitials, getRoleLabel, hasRole } from '../lib/utils'
-import { LogOut, X } from 'lucide-react'
+import { LogOut, X, Download } from 'lucide-react'
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>
+}
 
 const tabs = [
   { id: 'home', label: 'Overview', icon: '⌂', minRole: 'public' },
@@ -20,6 +25,32 @@ export function Navbar() {
   const { activePage, setActivePage } = useApp()
   const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [installEvt, setInstallEvt] = useState<BeforeInstallPromptEvent | null>(null)
+  const [installed, setInstalled] = useState(false)
+
+  useEffect(() => {
+    const onBeforeInstall = (e: Event) => {
+      e.preventDefault()
+      setInstallEvt(e as BeforeInstallPromptEvent)
+    }
+    const onInstalled = () => {
+      setInstalled(true)
+      setInstallEvt(null)
+    }
+    window.addEventListener('beforeinstallprompt', onBeforeInstall)
+    window.addEventListener('appinstalled', onInstalled)
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onBeforeInstall)
+      window.removeEventListener('appinstalled', onInstalled)
+    }
+  }, [])
+
+  const promptInstall = async () => {
+    if (!installEvt) return
+    await installEvt.prompt()
+    await installEvt.userChoice
+    setInstallEvt(null)
+  }
 
   const handleLogout = () => {
     logout()
@@ -77,6 +108,15 @@ export function Navbar() {
               <LogOut size={15} />
             </button>
           )}
+          {installEvt && !installed && (
+            <button
+              onClick={promptInstall}
+              title="Install app"
+              className="bg-transparent border-none text-white/30 hover:text-white cursor-pointer transition-colors"
+            >
+              <Download size={15} />
+            </button>
+          )}
         </div>
       </aside>
 
@@ -87,6 +127,11 @@ export function Navbar() {
           <span className="logoWord" style={{ fontSize: 11 }}>LAVA</span>
         </button>
         <div className="flex items-center gap-3">
+          {installEvt && !installed && (
+            <button onClick={promptInstall} title="Install app" className="bg-transparent border-none text-white/40 hover:text-white cursor-pointer">
+              <Download size={17} />
+            </button>
+          )}
           {user && (
             <button onClick={handleLogout} className="bg-transparent border-none text-white/40 hover:text-white cursor-pointer">
               <LogOut size={17} />

@@ -1,7 +1,17 @@
 import { Router, Request, Response } from 'express'
-import { selectRows, countRows } from '../lib/supabase.js'
+import { selectRows, countRows, insertRow, deleteRows } from '../lib/supabase.js'
+import { authenticate, optionalAuth } from '../middleware/auth.js'
 
 const router = Router()
+
+const RETENTION_MS = 90 * 24 * 60 * 60 * 1000
+const HISTORY_LIMIT = 100
+
+function contentToText(content: any): string {
+  if (typeof content === 'string') return content
+  if (Array.isArray(content)) return content.map((b: any) => b.text || '').join('\n')
+  return ''
+}
 
 router.get('/status', async (_req: Request, res: Response) => {
   try {
@@ -12,15 +22,55 @@ router.get('/status', async (_req: Request, res: Response) => {
   }
 })
 
-router.post('/chat', async (req: Request, res: Response) => {
+router.get('/history', authenticate, async (req: Request, res: Response) => {
+  try {
+    const { userId } = (req as any).user
+    const cutoff = new Date(Date.now() - RETENTION_MS).toISOString()
+    await deleteRows('chat_messages', { user_id: userId, created_at: { op: 'lt', value: cutoff } })
+    const rows = await selectRows('chat_messages', {
+      where: { user_id: userId },
+      order: 'created_at.desc',
+      limit: HISTORY_LIMIT,
+    })
+    const messages = rows.reverse().map((r: any) => ({ role: r.role, content: r.content }))
+    res.json({ messages })
+  } catch (err: any) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+router.delete('/history', authenticate, async (req: Request, res: Response) => {
+  try {
+    const { userId } = (req as any).user
+    await deleteRows('chat_messages', { user_id: userId })
+    res.json({ success: true })
+  } catch (err: any) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+router.post('/chat', optionalAuth, async (req: Request, res: Response) => {
   try {
     const { messages, isPublic } = req.body
+    const userId = (req as any).user?.userId
 
     const settings = await selectRows('settings', { where: { key: 'claude_api_key' }, select: 'value' })
     const claudeKey = settings[0]?.value || ''
 
     if (!claudeKey) {
       return res.status(400).json({ error: 'Claude API key not configured. Go to Settings to add it.' })
+    }
+
+    if (userId && Array.isArray(messages)) {
+      const lastUser = [...messages].reverse().find((m: any) => m.role === 'user')
+      if (lastUser) {
+        await insertRow('chat_messages', {
+          id: crypto.randomUUID(),
+          user_id: userId,
+          role: 'user',
+          content: contentToText(lastUser.content),
+        }).catch(() => {})
+      }
     }
 
     const verifiedRecs = await selectRows('submissions', {
@@ -36,7 +86,7 @@ router.post('/chat', async (req: Request, res: Response) => {
 
     const kbDocs = await selectRows('knowledge_base')
     const kbCtx = kbDocs.length
-      ? '\n\nKNOWLEDGE BASE DOCUMENTS:\n' + kbDocs.map((d: any) => `--- ${d.name} ---\n${d.content.substring(0, 4000)}`).join('\n\n')
+      ? '\n\nKNOWLEDGE BASE DOCUMENTS:\n' + kbDocs.map((d: any) => `--- ${d.name} ---\n${d.content.substring(0, 20000)}`).join('\n\n')
       : ''
 
     const sysPrompt = `You are LAVA (Land Valuation Assistant), a professional AI assistant for land valuation in Ghana for members of the Ghana Institution of Surveyors (GhIS).
@@ -83,6 +133,16 @@ FLOOR PLAN SKETCHES: If the user attaches an image of a hand-drawn floor plan, c
     }
 
     const data = await anthropicRes.json()
+
+    if (userId && data.content?.[0]?.text) {
+      await insertRow('chat_messages', {
+        id: crypto.randomUUID(),
+        user_id: userId,
+        role: 'assistant',
+        content: data.content[0].text,
+      }).catch(() => {})
+    }
+
     res.json(data)
   } catch (err: any) {
     res.status(500).json({ error: err.message || 'AI chat failed' })

@@ -26,6 +26,16 @@ CREATE TABLE IF NOT EXISTS public.settings (
   value text NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS public.chat_messages (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id text NOT NULL,
+  role text NOT NULL CHECK (role IN ('user','assistant')),
+  content text NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_chat_messages_user ON public.chat_messages(user_id, created_at);
+
 ALTER TABLE public.submissions ADD COLUMN IF NOT EXISTS user_id text;
 
 CREATE INDEX IF NOT EXISTS idx_submissions_status ON public.submissions(status);

@@ -24,6 +24,19 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+export function optionalAuth(req: Request, res: Response, next: NextFunction) {
+  const authHeader = req.headers.authorization
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    try {
+      const decoded = jwt.verify(authHeader.split(' ')[1], JWT_SECRET) as JwtPayload
+      ;(req as any).user = decoded
+    } catch {
+      /* ignore invalid tokens — treat as anonymous */
+    }
+  }
+  next()
+}
+
 export function requireRole(...roles: string[]) {
   return (req: Request, res: Response, next: NextFunction) => {
     const user = (req as any).user as JwtPayload

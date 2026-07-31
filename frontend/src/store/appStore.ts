@@ -17,6 +17,7 @@ interface AppState {
   setSubmissions: (subs: Submission[]) => void
   setStats: (stats: DashboardStats) => void
   addChatMessage: (msg: ChatMessage) => void
+  setChatMessages: (msgs: ChatMessage[]) => void
   clearChat: () => void
   setPendingImage: (att: PendingAttachment | null) => void
   setPendingDoc: (att: PendingAttachment | null) => void
@@ -48,6 +49,7 @@ export const useApp = create<AppState>((set) => ({
   setSubmissions: (subs) => set({ submissions: subs }),
   setStats: (stats) => set({ stats }),
   addChatMessage: (msg) => set((s) => ({ chatMessages: [...s.chatMessages, msg] })),
+  setChatMessages: (msgs) => set({ chatMessages: msgs }),
   clearChat: () => set({
     chatMessages: [
       {

@@ -1,4 +1,4 @@
-import type { User, Submission, DashboardStats, KnowledgeDoc } from '../types'
+import type { User, Submission, DashboardStats, KnowledgeDoc, ChatMessage } from '../types'
 
 const BASE = '/api'
 
@@ -88,6 +88,13 @@ export const ai = {
     request<any>('/ai/chat', {
       method: 'POST',
       body: JSON.stringify({ messages, isPublic }),
+    }),
+
+  history: () => request<{ messages: ChatMessage[] }>('/ai/history'),
+
+  clearHistory: () =>
+    request<{ success: boolean }>('/ai/history', {
+      method: 'DELETE',
     }),
 }
 

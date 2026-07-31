@@ -15,10 +15,16 @@ const quickPrompts = [
   { label: 'Calculate stamp duty', text: 'How is stamp duty calculated?' },
 ]
 
+const greeting: ChatMessage = {
+  role: 'assistant',
+  content: 'Hello! I am LAVA, Ghana\'s AI-powered land valuation assistant. I am trained on GhIS valuation standards, Ghana Land Act 2020, Stamp Duty Act, and Market Comparison Analysis methodology - with direct access to the verified LAVA land transaction database.\n\nAsk me about land values, comparable sales, stamp duty, or valuation methodology.',
+}
+
 export function AIAssistant() {
   const { user } = useAuth()
   const {
-    chatMessages, addChatMessage, pendingImage, setPendingImage,
+    chatMessages, addChatMessage, setChatMessages, clearChat,
+    pendingImage, setPendingImage,
     pendingDoc, setPendingDoc, freeQuestions, incrementFreeQuestions,
     showUpgradeBanner, setShowUpgradeBanner,
   } = useApp()
@@ -35,6 +41,21 @@ export function AIAssistant() {
       .then((res) => setDbLive(res.verifiedRecords > 0))
       .catch(() => setDbLive(false))
   }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    if (user) {
+      aiApi.history()
+        .then(({ messages }) => {
+          if (cancelled) return
+          setChatMessages(messages.length ? messages : [greeting])
+        })
+        .catch(() => {})
+    } else {
+      setChatMessages([greeting])
+    }
+    return () => { cancelled = true }
+  }, [user, setChatMessages])
 
   useEffect(() => {
     chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: 'smooth' })
@@ -136,6 +157,18 @@ export function AIAssistant() {
     }
   }
 
+  const handleClear = async () => {
+    clearChat()
+    if (user) {
+      try {
+        await aiApi.clearHistory()
+        toast.success('Conversation cleared.')
+      } catch (err: any) {
+        toast.error(err.message || 'Could not clear history.')
+      }
+    }
+  }
+
   const renderContent = (msg: ChatMessage) => {
     const content = typeof msg.content === 'string' ? msg.content : msg.content.map((b: any) => b.text || '').join(' ')
 
@@ -200,10 +233,20 @@ export function AIAssistant() {
         <div className="chatPanel panel">
           <div className="chatHead">
             <div>
-              <h2>New valuation conversation</h2>
+              <h2>{user ? 'Valuation conversation' : 'New valuation conversation'}</h2>
               <span>Responses are guidance, not a formal valuation opinion.</span>
             </div>
-            <span>● Ready</span>
+            <span className="flex items-center gap-3">
+              {user && chatMessages.length > 1 && (
+                <button
+                  onClick={handleClear}
+                  className="text-[10px] font-semibold text-muted hover:text-red bg-transparent border-none cursor-pointer"
+                >
+                  Clear chat
+                </button>
+              )}
+              <span>● Ready</span>
+            </span>
           </div>
 
           {(pendingImage?.preview || pendingDoc) && (

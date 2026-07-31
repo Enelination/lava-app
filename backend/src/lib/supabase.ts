@@ -38,7 +38,11 @@ function whereClause(where: Record<string, unknown>): Record<string, string> {
   const out: Record<string, string> = {}
   for (const [key, value] of Object.entries(where)) {
     if (value === null || value === undefined) out[key] = 'is.null'
-    else out[key] = `eq.${String(value)}`
+    else if (typeof value === 'object' && 'op' in value && 'value' in value) {
+      const op = String((value as { op: unknown }).op)
+      const val = (value as { value: unknown }).value
+      out[key] = `${op}.${String(val)}`
+    } else out[key] = `eq.${String(value)}`
   }
   return out
 }

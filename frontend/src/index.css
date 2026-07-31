@@ -156,35 +156,12 @@
     width: 100%;
   }
 
-  /* ---------- Landing ---------- */
+  /* ---------- Landing (Festland-inspired) ---------- */
   .landing {
-    background: var(--deep);
-    color: #fff;
+    background: var(--cream);
+    color: var(--ink);
     min-height: 100vh;
     position: relative;
-    overflow: hidden;
-  }
-  .landing::before {
-    content: '';
-    position: absolute;
-    top: -300px;
-    right: -300px;
-    width: 800px;
-    height: 800px;
-    border: 1px solid rgba(230, 183, 92, 0.16);
-    border-radius: 50%;
-    pointer-events: none;
-  }
-  .landing::after {
-    content: '';
-    position: absolute;
-    bottom: -150px;
-    left: -170px;
-    width: 420px;
-    height: 420px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 50%;
-    pointer-events: none;
   }
   .landingNav {
     display: flex;
@@ -192,139 +169,238 @@
     justify-content: space-between;
     gap: 30px;
     padding: 22px 6vw;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    position: relative;
-    z-index: 5;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: rgba(247, 245, 240, 0.82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .landingNav .logoWord {
+    color: var(--ink);
+  }
+  .landingNav .logoSub {
+    color: var(--muted);
+  }
+  .landingNavLinks {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    margin-left: auto;
+    margin-right: 28px;
+  }
+  .landingNavLinks button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 4px 0;
+    border-bottom: 1px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .landingNavLinks button:hover {
+    color: var(--ink);
+    border-color: var(--ink);
+  }
+  .landingNav .navCta {
+    border-bottom: none;
+    padding-bottom: 0;
   }
   .landingHero {
-    max-width: 1080px;
+    max-width: 1180px;
     margin: 0 auto;
-    padding: 96px 6vw 70px;
-    text-align: left;
+    padding: 132px 6vw 84px;
     position: relative;
-    z-index: 5;
   }
   .eyebrow {
     display: inline-flex;
     align-items: center;
-    gap: 9px;
-    padding: 9px 18px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 99px;
+    gap: 10px;
     font-family: 'DM Mono', monospace;
     font-size: 11px;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.85);
-    margin-bottom: 34px;
+    color: var(--muted);
+    margin-bottom: 42px;
   }
   .eyebrow i {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
+    width: 7px;
+    height: 7px;
     background: var(--gold);
+    display: inline-block;
   }
   .landingHero h1 {
-    font-size: clamp(52px, 7.2vw, 84px);
-    line-height: 1.03;
-    font-weight: 600;
-    letter-spacing: -0.05em;
-    max-width: 900px;
-    margin-bottom: 28px;
+    font-size: clamp(56px, 8vw, 112px);
+    line-height: 0.98;
+    font-weight: 500;
+    letter-spacing: -0.045em;
+    max-width: 1000px;
+    margin-bottom: 44px;
+  }
+  .heroLineMask {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.09em;
+  }
+  .heroLine {
+    display: block;
   }
   .landingHero h1 em {
     font-family: 'Playfair Display', Georgia, serif;
     font-style: italic;
     font-weight: 500;
-    color: var(--gold);
   }
   .landingHero p {
     font-size: 17px;
-    line-height: 1.6;
-    color: rgba(255, 255, 255, 0.65);
-    max-width: 570px;
-    margin-bottom: 40px;
+    line-height: 1.65;
+    color: var(--muted);
+    max-width: 560px;
+    margin-bottom: 48px;
   }
   .landingActions {
     display: flex;
     align-items: center;
-    gap: 14px;
-    margin-bottom: 84px;
+    gap: 36px;
     flex-wrap: wrap;
+    margin-bottom: 96px;
+  }
+  .landingLink {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink);
+    padding: 0 0 8px;
+    border-bottom: 1px solid rgba(9, 35, 58, 0.35);
+    transition: gap 0.25s ease, border-color 0.25s ease;
+  }
+  .landingLink:hover {
+    gap: 16px;
+    border-color: var(--ink);
+  }
+  .landingLink.big {
+    font-size: 13px;
   }
   .trustBar {
     display: flex;
     align-items: center;
-    gap: 28px;
+    gap: 48px;
     flex-wrap: wrap;
+    padding-top: 28px;
+    border-top: 1px solid rgba(9, 35, 58, 0.16);
     font-family: 'DM Mono', monospace;
     font-size: 10px;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.45);
+    color: var(--muted);
   }
   .trustBar span {
     display: inline-flex;
-    align-items: center;
+    align-items: baseline;
     gap: 8px;
   }
   .trustBar b {
-    color: var(--gold);
+    color: var(--ink);
     font-weight: 500;
   }
   .landingFeatures {
-    max-width: 1420px;
+    max-width: 1180px;
     margin: 0 auto;
-    padding: 96px 6vw 120px;
-    position: relative;
-    z-index: 5;
+    padding: 60px 6vw 150px;
   }
   .landingFeatures h2 {
     font-family: 'Playfair Display', Georgia, serif;
-    font-weight: 500;
     font-style: italic;
-    font-size: 22px;
-    color: rgba(255, 255, 255, 0.5);
-    margin-bottom: 60px;
+    font-weight: 500;
+    font-size: clamp(26px, 3.4vw, 38px);
+    line-height: 1.15;
+    color: var(--ink);
+    max-width: 660px;
+    margin-bottom: 72px;
   }
   .featureGrid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
+    gap: 48px;
+    border-top: 1px solid rgba(9, 35, 58, 0.16);
   }
   .feature {
-    border-top: 1px solid rgba(255, 255, 255, 0.14);
-    padding-top: 24px;
+    padding-top: 26px;
   }
   .featureIndex {
     font-family: 'DM Mono', monospace;
-    font-size: 10px;
+    font-size: 11px;
     color: var(--gold);
-    margin-bottom: 16px;
+    margin-bottom: 18px;
   }
   .feature h3 {
-    font-size: 20px;
+    font-size: 21px;
     font-weight: 600;
+    letter-spacing: -0.02em;
     margin-bottom: 12px;
   }
   .feature p {
-    font-size: 13px;
+    font-size: 14px;
     line-height: 1.6;
-    color: rgba(255, 255, 255, 0.55);
+    color: var(--muted);
+  }
+  .featureArrow {
+    display: inline-block;
+    margin-top: 24px;
+    font-size: 18px;
+    color: var(--ink);
+    opacity: 0;
+    transform: translateX(-8px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .feature:hover .featureArrow {
+    opacity: 1;
+    transform: translateX(0);
   }
   .landingFooter {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 30px 6vw;
+    border-top: 1px solid var(--line);
+    background: var(--paper);
+  }
+  .landingFooterCta {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 120px 6vw 110px;
+  }
+  .landingFooterCta h2 {
+    font-size: clamp(44px, 6vw, 84px);
+    line-height: 0.98;
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    margin-bottom: 44px;
+  }
+  .landingFooterCta h2 em {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-style: italic;
+    font-weight: 500;
+  }
+  .landingFooterBar {
+    border-top: 1px solid var(--line);
+    padding: 26px 6vw;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 16px;
+    flex-wrap: wrap;
     font-family: 'DM Mono', monospace;
     font-size: 10px;
     letter-spacing: 0.04em;
-    color: rgba(255, 255, 255, 0.4);
-    position: relative;
-    z-index: 5;
+    color: var(--muted);
   }
 
   .logoMark {
@@ -1761,14 +1837,18 @@
   }
   .landingActions {
     flex-direction: column;
-    align-items: stretch;
+    align-items: flex-start;
   }
-  .landingActions .button {
-    width: 100%;
+  .landingNavLinks {
+    display: none;
   }
-  .landingFooter {
+  .landingHero h1 {
+    font-size: clamp(44px, 12vw, 64px);
+  }
+  .landingFooterBar {
     flex-direction: column;
     text-align: center;
+    justify-content: center;
   }
   .welcome h1 {
     font-size: 30px;

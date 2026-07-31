@@ -1,17 +1,16 @@
-FROM node:20-bookworm-slim AS deps
+FROM node:22-trixie-slim AS deps
 WORKDIR /app
-RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json ./
 COPY backend/package.json backend/package.json
 COPY frontend/package.json frontend/package.json
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 FROM deps AS build
 WORKDIR /app
 COPY . .
-RUN npm run build && npm rebuild better-sqlite3 --build-from-source
+RUN npm run build
 
-FROM node:20-bookworm-slim AS runtime
+FROM node:22-trixie-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=build /app/backend/dist ./backend/dist

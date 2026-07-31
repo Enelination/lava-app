@@ -79,7 +79,7 @@ export function AIAssistant() {
 
   useEffect(() => {
     chatRef.current?.scrollTo({ top: chatRef.current.scrollHeight, behavior: 'smooth' })
-  }, [chatMessages, loading])
+  }, [chatMessages, pendingImage, pendingDoc, loading])
 
   const handleQuickPrompt = useCallback((text: string) => {
     setInput(text)
@@ -295,26 +295,6 @@ export function AIAssistant() {
             </span>
           </div>
 
-          {(pendingImage?.preview || pendingDoc) && (
-            <div className="attachment">
-              {pendingImage?.preview && (
-                <img src={pendingImage.preview} alt="Attachment" className="w-9 h-9 rounded object-cover" />
-              )}
-              {!pendingImage?.preview && pendingDoc && (
-                <FileText size={16} className="text-muted flex-shrink-0" />
-              )}
-              <span className="flex-1 truncate text-xs text-ink font-medium">
-                {pendingImage?.name || pendingDoc?.name}
-              </span>
-              <button
-                onClick={() => { setPendingImage(null); setPendingDoc(null); }}
-                className="text-[10px] font-semibold text-red hover:text-red/80 bg-transparent border-none cursor-pointer"
-              >
-                Remove
-              </button>
-            </div>
-          )}
-
           <div ref={chatRef} className="messages">
             {chatMessages.map((msg, i) => (
               <motion.div
@@ -336,6 +316,37 @@ export function AIAssistant() {
                 </div>
               </motion.div>
             ))}
+            {(pendingImage || pendingDoc) && (
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.18 }}
+                className="message user"
+              >
+                <div className="messageLabel">You</div>
+                <div className="bubble">
+                  <div className="attachCard">
+                    {pendingImage?.preview ? (
+                      <img src={pendingImage.preview} alt={pendingImage.name} className="attachCardThumb" />
+                    ) : (
+                      <div className="attachCardIcon">
+                        <FileText size={18} />
+                      </div>
+                    )}
+                    <div className="attachCardMeta min-w-0">
+                      <div className="attachCardName">{pendingImage?.name || pendingDoc?.name}</div>
+                      <div className="attachCardType">{pendingImage ? 'Image' : 'Document'}</div>
+                    </div>
+                    <button
+                      onClick={() => { setPendingImage(null); setPendingDoc(null); }}
+                      className="attachCardRemove"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
             {loading && (
               <div className="message">
                 <div className="messageLabel">LAVA</div>

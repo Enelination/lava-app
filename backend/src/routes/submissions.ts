@@ -90,6 +90,10 @@ router.patch('/:id', authenticate, requireRole('officer', 'admin'), async (req: 
   try {
     const { id } = req.params
     const { status, trust_score } = req.body
+    const actor = (req as any).user
+
+    const current = (await selectRows('submissions', { where: { id } }))[0]
+    if (!current) return res.status(404).json({ error: 'Submission not found' })
 
     const updates: Record<string, unknown> = {}
     if (status !== undefined) {
@@ -112,6 +116,51 @@ router.patch('/:id', authenticate, requireRole('officer', 'admin'), async (req: 
 
     const rows = await updateRows('submissions', { id }, updates)
     if (!rows.length) return res.status(404).json({ error: 'Submission not found' })
+
+    const statusChanged = status !== undefined && status !== current.status
+    const trustChanged = trust_score !== undefined && trust_score !== current.trust_score
+
+    const actorRow = (await selectRows('users', { where: { id: actor.userId }, select: 'id,name' }))[0] || {}
+    const details: Record<string, unknown> = {}
+    if (statusChanged) {
+      details.oldStatus = current.status
+      details.newStatus = status
+    }
+    if (trustChanged) {
+      details.oldTrust = current.trust_score
+      details.newTrust = trust_score
+    }
+    if (statusChanged || trustChanged) {
+      await insertRow('audit_logs', {
+        actor_id: actor.userId,
+        actor_name: actorRow.name || actor.role,
+        action: statusChanged ? `submission_${status}` : 'submission_trust',
+        target_type: 'submission',
+        target_id: id,
+        details: Object.keys(details).length ? details : null,
+        created_at: new Date().toISOString(),
+      }).catch(() => {})
+    }
+
+    if (current.user_id && statusChanged) {
+      const location = [current.community, current.district].filter(Boolean).join(', ') || current.region
+      const msgMap: Record<string, string> = {
+        Verified: `Your submission in ${location} was verified.`,
+        Flagged: `Your submission in ${location} was flagged for review.`,
+        Rejected: `Your submission in ${location} was rejected.`,
+      }
+      if (msgMap[status]) {
+        await insertRow('notifications', {
+          user_id: current.user_id,
+          type: `submission_${status.toLowerCase()}`,
+          title: `Submission ${status.toLowerCase()}`,
+          message: msgMap[status],
+          target_id: id,
+          read: false,
+          created_at: new Date().toISOString(),
+        }).catch(() => {})
+      }
+    }
 
     res.json(rows[0])
   } catch (err: any) {

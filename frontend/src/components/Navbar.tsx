@@ -4,7 +4,7 @@ import { useAuth } from '../store/authStore'
 import { useApp } from '../store/appStore'
 import { useNavigate } from 'react-router-dom'
 import { getInitials, getRoleLabel, hasRole } from '../lib/utils'
-import { LogOut, X, Download, CircleUserRound, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { LogOut, X, Download, CircleUserRound, PanelLeftClose, PanelLeftOpen, ScrollText } from 'lucide-react'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -18,6 +18,7 @@ const tabs: { id: string; label: string; icon: React.ReactNode; minRole: string 
   { id: 'ver', label: 'Verify', icon: '✓', minRole: 'officer' },
   { id: 'kb', label: 'Knowledge Base', icon: '▤', minRole: 'admin' },
   { id: 'cfg', label: 'Settings', icon: '⚙', minRole: 'admin' },
+  { id: 'log', label: 'Audit Trail', icon: <ScrollText size={15} />, minRole: 'admin' },
   { id: 'acct', label: 'Account', icon: <CircleUserRound size={15} />, minRole: 'public' },
 ]
 

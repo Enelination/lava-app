@@ -593,6 +593,113 @@
     gap: 12px;
   }
 
+  /* ---------- Notifications bell ---------- */
+  .notifBadge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 99px;
+    background: var(--red);
+    color: #fff;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    line-height: 16px;
+    text-align: center;
+  }
+  .notifPanel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 320px;
+    max-width: 86vw;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 18px 45px rgba(6, 26, 44, 0.16);
+    z-index: 60;
+    overflow: hidden;
+  }
+  .notifHead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--line);
+    font-size: 12px;
+    color: var(--ink);
+  }
+  .notifMarkAll {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 11px;
+    transition: color 0.2s;
+  }
+  .notifMarkAll:hover {
+    color: var(--ink);
+  }
+  .notifList {
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  .notifEmpty {
+    padding: 26px 16px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .notifItem {
+    display: flex;
+    gap: 10px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    align-items: flex-start;
+  }
+  .notifItem:last-child {
+    border-bottom: none;
+  }
+  .notifItem.read {
+    opacity: 0.6;
+  }
+  .notifDot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--gold);
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+  .notifItem.read .notifDot {
+    background: var(--line);
+  }
+  .notifMsg {
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--ink);
+  }
+  .notifTime {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+
+  /* ---------- Audit log ---------- */
+  .auditLog .recordHeader,
+  .auditLog .record {
+    grid-template-columns: 1.1fr 1.1fr 1.4fr 0.8fr;
+  }
+
   /* ---------- Panels ---------- */
   .panel {
     background: var(--paper);

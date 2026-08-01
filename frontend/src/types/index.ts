@@ -82,3 +82,25 @@ export interface PendingAttachment {
   text?: string
   kind?: string
 }
+
+export interface AppNotification {
+  id: string
+  user_id: string
+  type: string
+  title: string | null
+  message: string
+  target_id: string | null
+  read: boolean
+  created_at: string
+}
+
+export interface AuditLog {
+  id: string
+  actor_id: string | null
+  actor_name: string | null
+  action: string
+  target_type: string
+  target_id: string | null
+  details: { oldStatus?: string; newStatus?: string; oldTrust?: string; newTrust?: string } | null
+  created_at: string
+}

@@ -10,6 +10,8 @@ import submissionsRoutes from './routes/submissions.js'
 import aiRoutes from './routes/ai.js'
 import knowledgeBaseRoutes from './routes/knowledgeBase.js'
 import settingsRoutes from './routes/settings.js'
+import notificationsRoutes from './routes/notifications.js'
+import auditRoutes from './routes/audit.js'
 import { initSupabase } from './lib/supabase.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -78,6 +80,8 @@ app.use('/api/submissions', submissionsRoutes)
 app.use('/api/ai', aiRoutes)
 app.use('/api/knowledge-base', knowledgeBaseRoutes)
 app.use('/api/settings', settingsRoutes)
+app.use('/api/notifications', notificationsRoutes)
+app.use('/api/audit', auditRoutes)
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', version: '1.0.0' })

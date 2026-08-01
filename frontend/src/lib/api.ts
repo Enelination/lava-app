@@ -1,4 +1,4 @@
-import type { User, Submission, DashboardStats, KnowledgeDoc, ChatMessage } from '../types'
+import type { User, Submission, DashboardStats, KnowledgeDoc, ChatMessage, AppNotification, AuditLog } from '../types'
 
 const BASE = '/api'
 
@@ -121,4 +121,18 @@ export const settings = {
       method: 'PUT',
       body: JSON.stringify(data),
     }),
+}
+
+export const notifications = {
+  list: () => request<{ notifications: AppNotification[]; unread: number }>('/notifications'),
+
+  markAllRead: () =>
+    request<{ success: boolean }>('/notifications/read', {
+      method: 'PATCH',
+      body: JSON.stringify({}),
+    }),
+}
+
+export const audit = {
+  list: () => request<AuditLog[]>('/audit'),
 }

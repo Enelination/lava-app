@@ -10,6 +10,8 @@ import { VerificationQueue } from './VerificationQueue'
 import { KnowledgeBase } from './KnowledgeBase'
 import { Settings } from './Settings'
 import { Profile } from './Profile'
+import { AuditLogPage } from './AuditLog'
+import { NotificationsBell } from './NotificationsBell'
 import { getInitials } from '../lib/utils'
 
 const pages: Record<string, React.FC> = {
@@ -20,6 +22,7 @@ const pages: Record<string, React.FC> = {
   kb: KnowledgeBase,
   cfg: Settings,
   acct: Profile,
+  log: AuditLogPage,
 }
 
 const pageNames: Record<string, string> = {
@@ -30,6 +33,7 @@ const pageNames: Record<string, string> = {
   kb: 'Knowledge Base',
   cfg: 'Settings',
   acct: 'Account',
+  log: 'Audit Trail',
 }
 
 export function AppLayout() {
@@ -53,6 +57,7 @@ export function AppLayout() {
             LAVA <span className="mx-1.5 opacity-50">/</span> <b>{pageNames[activePage] || 'Overview'}</b>
           </div>
           <div className="topbarUser">
+            <NotificationsBell />
             <div className="hidden sm:block text-right">
               <div className="text-[11px] font-semibold text-ink leading-tight">
                 {user?.name?.split(' ')[0] || 'Guest'}

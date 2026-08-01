@@ -223,6 +223,13 @@ All endpoints are under `/api`. Auth-protected routes require `Authorization: Be
 | `PUT` | `/api/settings` | admin | Update settings |
 | `GET` | `/api/health` | public | Health check |
 
+**Interactive documentation (Swagger UI):**
+
+- UI: `GET /api-docs`
+- Raw OpenAPI spec (JSON): `GET /api-docs.json`
+
+The Swagger UI lets you explore every endpoint, see request/response schemas, and send authenticated requests — click the green **Authorize** button and paste a JWT from `POST /api/auth/login` (or use the "Try it out" button on login to get one).
+
 **Rate limits** (express-rate-limit): login/change-password 10 per 15 min · register 5 per hour · AI chat 90 per 15 min.
 
 ---

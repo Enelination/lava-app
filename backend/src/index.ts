@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit'
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import swaggerUi from 'swagger-ui-express'
 import authRoutes from './routes/auth.js'
 import submissionsRoutes from './routes/submissions.js'
 import aiRoutes from './routes/ai.js'
@@ -12,6 +13,7 @@ import knowledgeBaseRoutes from './routes/knowledgeBase.js'
 import settingsRoutes from './routes/settings.js'
 import notificationsRoutes from './routes/notifications.js'
 import auditRoutes from './routes/audit.js'
+import openapi from './openapi.js'
 import { initSupabase } from './lib/supabase.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -22,24 +24,29 @@ console.log('LAVA server starting…')
 console.log('Node version:', process.version)
 console.log('__dirname:', __dirname)
 
-app.use(
+const cspDirectives = {
+  defaultSrc: ["'self'"],
+  scriptSrc: ["'self'"],
+  styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+  fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
+  imgSrc: ["'self'", 'data:', 'blob:'],
+  connectSrc: ["'self'"],
+  objectSrc: ["'none'"],
+  frameAncestors: ["'none'"],
+  baseUri: ["'self'"],
+  formAction: ["'self'"],
+}
+
+app.use((req, res, next) => {
+  const isDocs = req.path.startsWith('/api-docs')
   helmet({
     contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-        fontSrc: ["'self'", 'https://fonts.gstatic.com', 'data:'],
-        imgSrc: ["'self'", 'data:', 'blob:'],
-        connectSrc: ["'self'"],
-        objectSrc: ["'none'"],
-        frameAncestors: ["'none'"],
-        baseUri: ["'self'"],
-        formAction: ["'self'"],
-      },
+      directives: isDocs
+        ? { ...cspDirectives, scriptSrc: ["'self'", "'unsafe-inline'"] }
+        : cspDirectives,
     },
-  })
-)
+  })(req, res, next)
+})
 
 const allowedOrigins = (process.env.APP_ORIGINS || '')
   .split(',')
@@ -82,6 +89,18 @@ app.use('/api/knowledge-base', knowledgeBaseRoutes)
 app.use('/api/settings', settingsRoutes)
 app.use('/api/notifications', notificationsRoutes)
 app.use('/api/audit', auditRoutes)
+
+app.get('/api-docs.json', (_req, res) => {
+  res.json(openapi)
+})
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapi, {
+  customSiteTitle: 'LAVA API Documentation',
+  swaggerOptions: {
+    persistAuthorization: true,
+    displayRequestDuration: true,
+  },
+}))
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', version: '1.0.0' })

@@ -29,7 +29,7 @@ export function LandingPage() {
   const [ctaTick, setCtaTick] = useState(0)
 
   useEffect(() => {
-    const id = setInterval(() => setCtaTick((t) => t + 1), 2400)
+    const id = setInterval(() => setCtaTick((t) => t + 1), 4000)
     return () => clearInterval(id)
   }, [])
 

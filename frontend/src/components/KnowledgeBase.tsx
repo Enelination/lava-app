@@ -38,7 +38,7 @@ export function KnowledgeBase() {
     setUploading(true)
     try {
       const text = await file.text()
-      await kbApi.upload(file.name, text)
+      await kbApi.upload(file.name, text.replace(/\u0000/g, ''))
       toast.success(`${file.name} added successfully.`)
       loadDocs()
     } catch (err: any) {

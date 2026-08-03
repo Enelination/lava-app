@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react'
-import { RefreshCw, ShieldCheck, Undo2 } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { RefreshCw, Search, ShieldCheck, Undo2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { admin as adminApi } from '../lib/api'
 import { useAuth } from '../store/authStore'
 import { getRoleLabel } from '../lib/utils'
 import type { User } from '../types'
+
+const inputCls =
+  'w-full border border-line rounded-sm2 bg-paper px-3 py-2.5 text-xs text-ink outline-none focus:border-muted transition-colors placeholder:text-[#b0bcc3]'
 
 function fmtDate(iso: string): string {
   if (!iso) return '—'
@@ -16,6 +19,7 @@ export function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
 
   const load = async () => {
     setLoading(true)
@@ -32,6 +36,16 @@ export function UsersPage() {
   useEffect(() => {
     load()
   }, [])
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return users
+    return users.filter((u) =>
+      [u.name, u.email, u.licence_number, u.organisation, u.role]
+        .filter(Boolean)
+        .some((v) => String(v).toLowerCase().includes(q))
+    )
+  }, [users, query])
 
   const setRole = async (id: string, role: string) => {
     setBusy(id)
@@ -60,6 +74,16 @@ export function UsersPage() {
         </button>
       </div>
 
+      <div className="relative mb-4 max-w-sm">
+        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search by name, email or licence…"
+          className={`${inputCls} pl-8`}
+        />
+      </div>
+
       <div className="panel">
         <div className="records userLog">
           <div className="recordHeader userRow">
@@ -73,12 +97,14 @@ export function UsersPage() {
             <div className="record userRow">
               <span className="recordSmall">Loading users…</span>
             </div>
-          ) : users.length === 0 ? (
+          ) : filtered.length === 0 ? (
             <div className="record userRow">
-              <span className="recordSmall">No users yet.</span>
+              <span className="recordSmall">
+                {query.trim() ? 'No users match your search.' : 'No users yet.'}
+              </span>
             </div>
           ) : (
-            users.map((u) => (
+            filtered.map((u) => (
               <div className="record userRow" key={u.id}>
                 <span className="min-w-0">
                   <span className="block text-ink font-semibold text-[12px] truncate">

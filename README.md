@@ -1,6 +1,6 @@
 # LAVA — Land & Asset Valuation Assistant
 
-LAVA is a full‑stack web application for property valuation workflows in Ghana. Surveyors submit property records, officers and admins verify them, and an AI assistant helps with valuation guidance (market comparison, GhIS report structure, stamp duty, Land Act 2020). A complete audit trail tracks every verification, and in‑app notifications tell surveyors when their submissions are reviewed.
+LAVA is a full‑stack web application for property valuation workflows in Ghana. Any registered user submits property records, verifiers (surveyor accounts promoted by an admin) and admins verify them, and an AI assistant helps with valuation guidance (market comparison, GhIS report structure, stamp duty, Land Act 2020). A complete audit trail tracks every verification, and in‑app notifications tell submitters when their records are reviewed.
 
 | Layer | Tech |
 | --- | --- |
@@ -94,7 +94,7 @@ Tables (Postgres, managed in Supabase):
 
 | Table | Purpose |
 | --- | --- |
-| `submissions` | Property records submitted by surveyors. Has `user_id` (owner), `status`, `trust_score`. |
+| `submissions` | Property records submitted by any registered user. Has `user_id` (owner), `status`, `trust_score`. |
 | `users` | App users: `id`, `name`, `email`, bcrypt `password`, `licence_number`, `organisation`, `role`. |
 | `knowledge_base` | Documents used by the AI assistant (built-in guides + admin uploads). |
 | `settings` | Key/value settings (e.g. `claude_api_key`). |
@@ -102,7 +102,12 @@ Tables (Postgres, managed in Supabase):
 | `audit_logs` | Audit trail of verification actions: actor, action, target, `details` (JSON), `created_at`. |
 | `notifications` | In-app notifications, FK → `users(id)` with `ON DELETE CASCADE`, `read` flag. |
 
-**Roles:** `public` · `surveyor` · `officer` · `admin`
+**Roles:** `public` · `surveyor` · `officer` (verifier) · `admin`
+
+- `public` — a registered account with no licence number. Can submit records.
+- `surveyor` — registered with a licence number (`GHIS/…`). Same access as public.
+- `officer` — a **verifier**: a surveyor promoted by an admin (Users tab) so they can review/verify submissions. Not every surveyor is a verifier.
+- `admin` — full access, including the Knowledge Base, Settings, Audit Trail and user management.
 
 Run the SQL scripts in order in the Supabase **SQL Editor** (you only need the second one if starting from an existing app):
 
@@ -126,8 +131,8 @@ cp .env.example .env        # fill in SUPABASE_URL, SUPABASE_ANON_KEY, JWT_SECRE
 #    → open your Supabase project → SQL Editor → run init-supabase.sql then audit-and-notifications.sql
 
 # 4. Seed demo users (optional)
-#    Creates admin@lava.gh, kofi@survey.gh, ama@lava.gh (password: lava2025)
-#    Edit the seed block in backend/src/lib/supabase.ts if you want different accounts.
+#    Creates admin@lava.gh, kofi@survey.gh (surveyor — promote to verifier in the Users tab),
+#    ama@lava.gh (verifier) — password: lava2025
 SEED_DEMO_USERS=1 npm run dev:backend   # run once, then remove the flag
 
 # 5. Start everything
@@ -207,14 +212,18 @@ All endpoints are under `/api`. Auth-protected routes require `Authorization: Be
 | `POST` | `/api/auth/change-password` | auth | Change password (needs current password) |
 | `GET` | `/api/submissions` | public | List submissions (filter/sort via query params) |
 | `GET` | `/api/submissions/stats` | public | Dashboard metrics |
-| `POST` | `/api/submissions` | surveyor, officer, admin | Create submission (owner set from token) |
-| `PATCH` | `/api/submissions/:id` | officer, admin | Update status/trust → **writes audit log + notifies owner** |
+| `POST` | `/api/submissions` | any signed-in user | Create submission (owner set from token) |
+| `PATCH` | `/api/submissions/:id` | verifier, admin | Update status/trust → **writes audit log + notifies owner** |
 | `GET` | `/api/notifications` | auth | Latest 50 notifications + unread count |
 | `PATCH` | `/api/notifications/read` | auth | Mark specific IDs (or all) as read |
 | `GET` | `/api/audit` | admin | Audit trail (actor, action, details, timestamp) |
+| `GET` | `/api/admin/users` | admin | List all users (passwords excluded) |
+| `PATCH` | `/api/admin/users/:id` | admin | Change a user's role (e.g. promote surveyor → verifier) |
 | `GET` | `/api/knowledge-base` | public | List knowledge-base documents |
+| `GET` | `/api/knowledge-base/:id` | admin | Get a document with full content |
 | `POST` | `/api/knowledge-base/upload` | admin | Upload a document |
-| `DELETE` | `/api/knowledge-base/:id` | admin | Remove a document |
+| `PATCH` | `/api/knowledge-base/:id` | admin | Rename / replace a document's content |
+| `DELETE` | `/api/knowledge-base/:id` | admin | Remove an uploaded document |
 | `GET` | `/api/ai/status` | public | AI feature status |
 | `POST` | `/api/ai/chat` | auth/optional | Chat with the assistant (persists for signed-in users) |
 | `GET` | `/api/ai/history` | auth | Chat history |
@@ -236,16 +245,17 @@ The Swagger UI lets you explore every endpoint, see request/response schemas, an
 
 ## Roles & permissions
 
-| Capability | public | surveyor | officer | admin |
+| Capability | public | surveyor | officer (verifier) | admin |
 | --- | :-: | :-: | :-: | :-: |
 | View landing + submit-adjacent info | ✅ | ✅ | ✅ | ✅ |
 | View dashboard, browse submissions | ✅ | ✅ | ✅ | ✅ |
-| Submit a property record | ❌ | ✅ | ✅ | ✅ |
+| Submit a property record | ✅ | ✅ | ✅ | ✅ |
 | Verify / change submission status | ❌ | ❌ | ✅ | ✅ |
-| View notifications | ❌ | ✅ | ✅ | ✅ |
+| View notifications | ✅ | ✅ | ✅ | ✅ |
 | Upload / delete knowledge-base docs | ❌ | ❌ | ❌ | ✅ |
 | Manage settings (incl. Claude API key) | ❌ | ❌ | ❌ | ✅ |
 | View audit trail | ❌ | ❌ | ❌ | ✅ |
+| Manage users (promote surveyor → verifier) | ❌ | ❌ | ❌ | ✅ |
 | Chat with AI assistant | ✅ (guest) | ✅ | ✅ | ✅ |
 
 Guests (no token) can browse and use the AI assistant in "explorer" mode; chat history for guests is **not** persisted.

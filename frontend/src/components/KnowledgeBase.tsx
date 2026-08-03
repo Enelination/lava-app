@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Pencil, Plus, Search, Trash2, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { knowledgeBase as kbApi } from '../lib/api'
+import { extractTextFromFile } from '../lib/extractText'
 import type { KnowledgeDoc } from '../types'
 
 const builtinDocs: KnowledgeDoc[] = [
@@ -53,7 +54,11 @@ export function KnowledgeBase() {
     if (!file) return
     setUploading(true)
     try {
-      const text = await file.text()
+      const text = await extractTextFromFile(file)
+      if (!text.trim()) {
+        toast.error('No readable text found in that file (scanned PDF?).')
+        return
+      }
       await kbApi.upload(file.name, text.replace(/\u0000/g, ''))
       toast.success(`${file.name} added successfully.`)
       loadDocs()
@@ -143,7 +148,7 @@ export function KnowledgeBase() {
           <div className="uploadZone">
             <div className="uploadIcon">↑</div>
             <h4>Add a reference document</h4>
-            <p>PDF, DOCX or text files up to 10 MB.</p>
+            <p>PDF, DOCX or text files up to 10 MB — text is extracted automatically.</p>
             <label className="button mt-4 inline-flex cursor-pointer">
               {uploading ? 'Reading…' : 'Choose file'}
               <input
@@ -247,27 +252,29 @@ export function KnowledgeBase() {
                     {doc.word_count} words · {doc.type === 'builtin' ? 'Built-in' : 'Uploaded'}
                   </div>
                 </div>
-                <span className="font-mono text-[9px] uppercase tracking-[0.06em] bg-approve-bg text-approve-text px-2.5 py-1 rounded">
-                  Active
-                </span>
-                {doc.type === 'uploaded' && (
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => openEdit(doc.id)}
-                      className="text-muted hover:text-ink bg-transparent border-none cursor-pointer p-1"
-                      title="Edit document"
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(doc.id)}
-                      className="text-red hover:text-red/70 bg-transparent border-none cursor-pointer p-1"
-                      title="Remove document"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                )}
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.06em] bg-approve-bg text-approve-text px-2.5 py-1 rounded">
+                    Active
+                  </span>
+                  {doc.type === 'uploaded' && (
+                    <div className="flex items-center gap-0.5">
+                      <button
+                        onClick={() => openEdit(doc.id)}
+                        className="text-muted hover:text-ink bg-transparent border-none cursor-pointer p-1"
+                        title="Edit document"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(doc.id)}
+                        className="text-red hover:text-red/70 bg-transparent border-none cursor-pointer p-1"
+                        title="Remove document"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
 

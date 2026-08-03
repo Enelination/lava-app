@@ -54,7 +54,7 @@ LAVA is a full‑stack web application for property valuation workflows in Ghana
 - **Monorepo** — `backend/` and `frontend/` are npm workspaces managed from the root `package.json`.
 - **Single server** — in production, Express serves both the `/api/*` REST API and the built React SPA (`frontend/dist`), so one Render service hosts everything.
 - **Auth model** — the backend issues its own signed JWTs (7‑day expiry). Passwords are bcrypt‑hashed. Supabase is used purely as a data store via PostgREST with the anon key; **RLS / service_role are not used** — authorization is enforced in the Express layer.
-- **Audit & notifications** — verification changes write to `audit_logs` (who/what/when) and insert a row into `notifications` for the submission owner. The bell UI polls `GET /api/notifications` every 30 seconds.
+- **Audit & notifications** — verification changes, role changes and sign-ins (successful and failed) write to `audit_logs` (who/what/when). Entries older than **5 days are pruned automatically** (at startup, then every 6 hours). Verification changes also insert a row into `notifications` for the submission owner. The bell UI polls `GET /api/notifications` every 30 seconds.
 
 ---
 
@@ -300,3 +300,4 @@ npm run build          # tsc -b && vite build
 - **RLS/service_role is intentionally not used.** Supabase is treated as a plain Postgres store; all authorization happens in Express. Revisit if you need per-row security at the database layer.
 - **The `submissions` table predates the app** (original data). `init-supabase.sql` only adds the `user_id` column and indexes to it — it never recreates it.
 - **Notifications only fire for submissions that have a `user_id` owner**; legacy rows without an owner are skipped silently.
+- **Audit logs are pruned after 5 days** (`pruneAuditLogs()` runs at startup and every 6 hours). This is a retention policy, not an archival system.

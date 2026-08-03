@@ -12,7 +12,7 @@ import aiRoutes from './routes/ai.js'
 import knowledgeBaseRoutes from './routes/knowledgeBase.js'
 import settingsRoutes from './routes/settings.js'
 import notificationsRoutes from './routes/notifications.js'
-import auditRoutes from './routes/audit.js'
+import auditRoutes, { pruneAuditLogs } from './routes/audit.js'
 import usersRoutes from './routes/users.js'
 import openapi from './openapi.js'
 import { initSupabase } from './lib/supabase.js'
@@ -125,3 +125,10 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 app.listen(PORT, () => {
   console.log(`LAVA running on http://localhost:${PORT}`)
 })
+
+pruneAuditLogs()
+  .then(() => console.log('Audit log pruning complete (5-day retention).'))
+  .catch((err) => console.warn('Audit log pruning failed:', err.message))
+setInterval(() => {
+  pruneAuditLogs().catch((err) => console.warn('Audit log pruning failed:', err.message))
+}, 6 * 60 * 60 * 1000)

@@ -69,8 +69,29 @@ router.post('/login', async (req: Request, res: Response) => {
 
     const user = rows[0] as User | undefined
     if (!user || !bcrypt.compareSync(password, user.password)) {
+      if (user) {
+        await insertRow('audit_logs', {
+          actor_id: user.id,
+          actor_name: user.name,
+          action: 'login_failed',
+          target_type: 'user',
+          target_id: user.id,
+          details: { reason: 'invalid password' },
+          created_at: new Date().toISOString(),
+        }).catch(() => {})
+      }
       return res.status(401).json({ error: 'Invalid credentials' })
     }
+
+    await insertRow('audit_logs', {
+      actor_id: user.id,
+      actor_name: user.name,
+      action: 'login',
+      target_type: 'user',
+      target_id: user.id,
+      details: null,
+      created_at: new Date().toISOString(),
+    }).catch(() => {})
 
     const token = signToken({ userId: user.id, role: user.role })
     res.json({

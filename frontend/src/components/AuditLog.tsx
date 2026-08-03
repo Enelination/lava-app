@@ -16,6 +16,8 @@ function fmtDate(iso: string): string {
 
 function describe(a: AuditLog): string {
   const d = a.details || {}
+  if (a.action === 'login') return 'Signed in'
+  if (a.action === 'login_failed') return 'Failed login attempt'
   if (d.newStatus) return `${d.oldStatus || '?'} → ${d.newStatus}`
   if (d.newTrust) return `Trust ${d.oldTrust || '?'} → ${d.newTrust}`
   return a.action.replace('submission_', '')
@@ -46,7 +48,7 @@ export function AuditLogPage() {
         <div className="welcome">
           <div className="crumb">Admin</div>
           <h1>Audit trail.</h1>
-          <p>Who changed what, and when.</p>
+          <p>Who did what, and when — including sign-ins. Logs are kept for 5 days.</p>
         </div>
         <button onClick={load} disabled={loading} className="button outline flex-shrink-0">
           <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />

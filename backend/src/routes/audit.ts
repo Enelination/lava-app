@@ -1,6 +1,13 @@
 import { Router, Request, Response } from 'express'
-import { selectRows } from '../lib/supabase.js'
+import { selectRows, deleteRows } from '../lib/supabase.js'
 import { authenticate, requireRole } from '../middleware/auth.js'
+
+const RETENTION_MS = 5 * 24 * 60 * 60 * 1000
+
+export async function pruneAuditLogs(): Promise<void> {
+  const cutoff = new Date(Date.now() - RETENTION_MS).toISOString()
+  await deleteRows('audit_logs', { created_at: { op: 'lt', value: cutoff } })
+}
 
 const router = Router()
 

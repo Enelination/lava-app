@@ -461,7 +461,8 @@ const openapi = {
       get: {
         tags: ['Audit'],
         summary: 'Audit trail',
-        description: 'Latest 100 audit-log entries (verification actions). Admin only.',
+        description:
+          'Latest 100 audit-log entries — verification changes, role changes and sign-ins (successful and failed), each with an actor and timestamp. Admin only. Entries older than 5 days are pruned automatically.',
         security: [{ bearerAuth: [] }],
         responses: {
           '200': {

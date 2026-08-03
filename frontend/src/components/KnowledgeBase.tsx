@@ -123,14 +123,20 @@ export function KnowledgeBase() {
     }
   }
 
-  const allDocs = useMemo(() => [...builtinDocs, ...docs], [docs])
+  const uploadedDocs = useMemo(
+    () =>
+      docs
+        .filter((d) => d.type === 'uploaded')
+        .sort((a, b) => (b.created_at || '').localeCompare(a.created_at || '')),
+    [docs]
+  )
+  const allDocs = useMemo(() => [...uploadedDocs, ...builtinDocs], [uploadedDocs])
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return allDocs
     return allDocs.filter((d) => d.name.toLowerCase().includes(q))
   }, [allDocs, query])
 
-  const uploadedDocs = docs.filter((d) => d.type === 'uploaded')
   const totalRefs = builtinDocs.length + uploadedDocs.length
 
   return (

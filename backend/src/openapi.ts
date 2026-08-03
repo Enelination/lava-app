@@ -502,6 +502,60 @@ const openapi = {
       },
     },
     '/api/knowledge-base/{id}': {
+      get: {
+        tags: ['Knowledge Base'],
+        summary: 'Get a document with full content',
+        description: 'Returns the document including its `content` field (used for editing). Admin only.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        responses: {
+          '200': {
+            description: 'Document with content',
+            content: {
+              'application/json': {
+                schema: {
+                  allOf: [
+                    { $ref: '#/components/schemas/KnowledgeDoc' },
+                    { type: 'object', properties: { content: { type: 'string' } } },
+                  ],
+                },
+              },
+            },
+          },
+          '403': { description: 'Admin only', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Document not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+      patch: {
+        tags: ['Knowledge Base'],
+        summary: 'Update a document',
+        description: 'Rename an uploaded document and/or replace its content (word count is recomputed). Built-in documents cannot be edited.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string', example: 'Stamp_Duty_Notes_2024.pdf' },
+                  content: { type: 'string', example: 'Updated full text content…' },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Updated document',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/KnowledgeDoc' } } },
+          },
+          '400': { description: 'Empty name or nothing to update', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Admin only', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Uploaded document not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
       delete: {
         tags: ['Knowledge Base'],
         summary: 'Delete an uploaded document',

@@ -46,6 +46,7 @@ export interface KnowledgeDoc {
   type: 'builtin' | 'uploaded'
   word_count: number
   created_at: string
+  content?: string
 }
 
 export interface DashboardStats {

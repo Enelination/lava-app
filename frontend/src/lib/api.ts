@@ -101,10 +101,18 @@ export const ai = {
 export const knowledgeBase = {
   list: () => request<KnowledgeDoc[]>('/knowledge-base'),
 
+  get: (id: string) => request<KnowledgeDoc>(`/knowledge-base/${id}`),
+
   upload: (name: string, content: string) =>
     request<KnowledgeDoc>('/knowledge-base/upload', {
       method: 'POST',
       body: JSON.stringify({ name, content }),
+    }),
+
+  update: (id: string, data: { name?: string; content?: string }) =>
+    request<KnowledgeDoc>(`/knowledge-base/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
     }),
 
   delete: (id: string) =>

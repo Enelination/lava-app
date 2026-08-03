@@ -906,6 +906,27 @@
     color: #fff;
   }
 
+  /* ---------- Queue toolbar ---------- */
+  .queueToolbar {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin: -10px 0 22px;
+  }
+  .queueToolbar .field {
+    min-width: 160px;
+    flex: 1 1 auto;
+  }
+  .queueToolbar .field input,
+  .queueToolbar .field select {
+    padding-top: 9px;
+    padding-bottom: 9px;
+  }
+  .queueToolbar .button {
+    margin-bottom: 2px;
+  }
+
   /* ---------- Queue ---------- */
   .queueCard {
     display: grid;

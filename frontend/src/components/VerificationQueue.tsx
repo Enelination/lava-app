@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { RefreshCw, Check, Flag, X } from 'lucide-react'
+import { RefreshCw, Check, Flag, X, Search } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { submissions as submissionsApi } from '../lib/api'
 import { useApp } from '../store/appStore'
@@ -12,6 +12,11 @@ const filters = ['All', 'Pending', 'Verified', 'Flagged', 'Rejected']
 export function VerificationQueue() {
   const { submissions, setSubmissions } = useApp()
   const [filter, setFilter] = useState('All')
+  const [region, setRegion] = useState('All')
+  const [minPrice, setMinPrice] = useState('')
+  const [maxPrice, setMaxPrice] = useState('')
+  const [search, setSearch] = useState('')
+  const [sortBy, setSortBy] = useState('newest')
   const [loading, setLoading] = useState(true)
 
   const loadAll = async () => {
@@ -42,9 +47,58 @@ export function VerificationQueue() {
     }
   }
 
-  const filtered = filter === 'All'
-    ? submissions
-    : submissions.filter((s) => s.status === filter)
+  const regions = useMemo(
+    () =>
+      Array.from(new Set(submissions.map((s) => s.region).filter(Boolean)))
+        .sort((a, b) => a.localeCompare(b)),
+    [submissions]
+  )
+
+  const filtered = useMemo(() => {
+    let list = submissions
+    if (filter !== 'All') list = list.filter((s) => s.status === filter)
+    if (region !== 'All') list = list.filter((s) => s.region === region)
+
+    const min = parseFloat(minPrice)
+    const max = parseFloat(maxPrice)
+    if (!isNaN(min)) list = list.filter((s) => s.price >= min)
+    if (!isNaN(max)) list = list.filter((s) => s.price <= max)
+
+    const q = search.trim().toLowerCase()
+    if (q) {
+      list = list.filter((s) =>
+        [s.community, s.district, s.region, s.surveyor_name, s.licence_number]
+          .filter(Boolean)
+          .some((v) => String(v).toLowerCase().includes(q))
+      )
+    }
+
+    const sorted = [...list]
+    switch (sortBy) {
+      case 'oldest':
+        sorted.sort((a, b) => new Date(a.submitted_at).getTime() - new Date(b.submitted_at).getTime())
+        break
+      case 'priceDesc':
+        sorted.sort((a, b) => b.price - a.price)
+        break
+      case 'priceAsc':
+        sorted.sort((a, b) => a.price - b.price)
+        break
+      default:
+        sorted.sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime())
+    }
+    return sorted
+  }, [submissions, filter, region, minPrice, maxPrice, search, sortBy])
+
+  const hasExtraFilters = region !== 'All' || minPrice !== '' || maxPrice !== '' || search.trim() !== ''
+
+  const clearFilters = () => {
+    setRegion('All')
+    setMinPrice('')
+    setMaxPrice('')
+    setSearch('')
+    setSortBy('newest')
+  }
 
   return (
     <div>
@@ -66,6 +120,64 @@ export function VerificationQueue() {
             {f}
           </button>
         ))}
+      </div>
+
+      <div className="queueToolbar">
+        <label className="field">
+          <span>Search</span>
+          <div className="relative">
+            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Place or surveyor…"
+              className="pl-8"
+            />
+          </div>
+        </label>
+        <label className="field">
+          <span>Region</span>
+          <select value={region} onChange={(e) => setRegion(e.target.value)}>
+            <option value="All">All regions</option>
+            {regions.map((r) => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
+        </label>
+        <label className="field">
+          <span>Min price</span>
+          <input
+            type="number"
+            min={0}
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
+            placeholder="GHS 0"
+          />
+        </label>
+        <label className="field">
+          <span>Max price</span>
+          <input
+            type="number"
+            min={0}
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+            placeholder="No max"
+          />
+        </label>
+        <label className="field">
+          <span>Sort</span>
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="priceDesc">Highest price</option>
+            <option value="priceAsc">Lowest price</option>
+          </select>
+        </label>
+        {hasExtraFilters && (
+          <button className="button outline" onClick={clearFilters}>
+            Clear
+          </button>
+        )}
       </div>
 
       {loading ? (

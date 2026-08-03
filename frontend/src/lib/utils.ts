@@ -38,7 +38,7 @@ export function getRoleLabel(role: string): string {
     case 'admin':
       return 'Admin'
     case 'officer':
-      return 'Vetting Officer'
+      return 'Verifier'
     case 'surveyor':
       return 'Surveyor'
     default:

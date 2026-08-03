@@ -4,7 +4,7 @@ import { useAuth } from '../store/authStore'
 import { useApp } from '../store/appStore'
 import { useNavigate } from 'react-router-dom'
 import { getInitials, getRoleLabel, hasRole } from '../lib/utils'
-import { LogOut, X, Download, CircleUserRound, PanelLeftClose, PanelLeftOpen, ScrollText } from 'lucide-react'
+import { LogOut, X, Download, CircleUserRound, PanelLeftClose, PanelLeftOpen, ScrollText, Users } from 'lucide-react'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -14,9 +14,10 @@ interface BeforeInstallPromptEvent extends Event {
 const tabs: { id: string; label: string; icon: React.ReactNode; minRole: string }[] = [
   { id: 'home', label: 'Overview', icon: '⌂', minRole: 'public' },
   { id: 'ai', label: 'LAVA Assistant', icon: '✦', minRole: 'public' },
-  { id: 'sub', label: 'Submit Data', icon: '＋', minRole: 'surveyor' },
+  { id: 'sub', label: 'Submit Data', icon: '＋', minRole: 'public' },
   { id: 'ver', label: 'Verify', icon: '✓', minRole: 'officer' },
   { id: 'kb', label: 'Knowledge Base', icon: '▤', minRole: 'admin' },
+  { id: 'adm', label: 'Users', icon: <Users size={15} />, minRole: 'admin' },
   { id: 'cfg', label: 'Settings', icon: '⚙', minRole: 'admin' },
   { id: 'log', label: 'Audit Trail', icon: <ScrollText size={15} />, minRole: 'admin' },
   { id: 'acct', label: 'Account', icon: <CircleUserRound size={15} />, minRole: 'public' },
@@ -74,7 +75,7 @@ export function Navbar() {
           onClick={() => navigate('/')}
           className="logoBox flex items-center gap-3 bg-transparent border-none cursor-pointer px-2 pb-6"
         >
-          <span className="logoMark">L</span>
+          <img src="/logo.png" alt="LAVA" className="logoImg" />
           <span className="text-left">
             <span className="logoWord">LAVA</span>
             <div className="logoSub">Valuation Assistant</div>
@@ -140,7 +141,7 @@ export function Navbar() {
       {/* Mobile top bar */}
       <div className="lg:hidden fixed top-0 inset-x-0 z-40 bg-deep text-white px-4 h-16 flex items-center justify-between">
         <button onClick={() => navigate('/')} className="flex items-center gap-2.5 bg-transparent border-none cursor-pointer">
-          <span className="logoMark" style={{ width: 30, height: 30, fontSize: 15 }}>L</span>
+          <img src="/logo.png" alt="LAVA" className="logoImg" style={{ width: 30, height: 30 }} />
           <span className="logoWord" style={{ fontSize: 11 }}>LAVA</span>
         </button>
         <div className="flex items-center gap-3">

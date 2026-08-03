@@ -5,6 +5,7 @@ export interface User {
   licence_number: string | null
   organisation: string | null
   role: 'public' | 'surveyor' | 'officer' | 'admin'
+  created_at?: string
 }
 
 export interface Submission {

@@ -144,3 +144,13 @@ export const notifications = {
 export const audit = {
   list: () => request<AuditLog[]>('/audit'),
 }
+
+export const admin = {
+  users: () => request<{ users: User[] }>('/admin/users'),
+
+  setRole: (id: string, role: string) =>
+    request<User>(`/admin/users/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ role }),
+    }),
+}

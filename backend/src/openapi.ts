@@ -374,7 +374,7 @@ const openapi = {
       post: {
         tags: ['Submissions'],
         summary: 'Create a submission',
-        description: 'Owner and surveyor identity are taken from the token, not the body. New submissions start as `Pending` / `Medium`.',
+        description: 'Any signed-in user (public, surveyor, officer or admin) can submit. Owner and surveyor identity are taken from the token, not the body. New submissions start as `Pending` / `Medium`.',
         security: [{ bearerAuth: [] }],
         requestBody: {
           required: true,
@@ -386,7 +386,8 @@ const openapi = {
             content: { 'application/json': { schema: { $ref: '#/components/schemas/Submission' } } },
           },
           '400': { description: 'Invalid payload', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
-          '403': { description: 'Requires surveyor, officer or admin role', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '401': { description: 'Authentication required', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Insufficient permissions', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
         },
       },
     },
@@ -468,6 +469,60 @@ const openapi = {
             content: { 'application/json': { schema: { type: 'array', items: { $ref: '#/components/schemas/AuditLog' } } } },
           },
           '403': { description: 'Admin only', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/api/admin/users': {
+      get: {
+        tags: ['Admin'],
+        summary: 'List users',
+        description: 'All users (passwords excluded), newest first. Admin only.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          '200': {
+            description: 'Users',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: { users: { type: 'array', items: { $ref: '#/components/schemas/User' } } },
+                },
+              },
+            },
+          },
+          '401': { description: 'Authentication required', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Admin only', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
+    },
+    '/api/admin/users/{id}': {
+      patch: {
+        tags: ['Admin'],
+        summary: 'Change a user role',
+        description:
+          'Admin only. Used to promote a surveyor to verifier (`role: "officer"`) or demote back (`role: "surveyor"`). Admin cannot change their own role. Writes an audit-log entry.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['role'],
+                properties: { role: { type: 'string', enum: ['public', 'surveyor', 'officer', 'admin'] } },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Updated user',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/User' } } },
+          },
+          '400': { description: 'Invalid role or own role change', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '403': { description: 'Admin only', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'User not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
         },
       },
     },

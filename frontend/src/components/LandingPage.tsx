@@ -51,7 +51,7 @@ export function LandingPage() {
           onClick={goExplore}
           className="flex items-center gap-3 bg-transparent border-none cursor-pointer"
         >
-          <span className="logoMark">L</span>
+          <img src="/logo.png" alt="LAVA" className="logoImg" />
           <span className="text-left">
             <span className="logoWord">LAVA</span>
             <div className="logoSub">Land Valuation Assistant Ghana</div>

@@ -13,6 +13,7 @@ import knowledgeBaseRoutes from './routes/knowledgeBase.js'
 import settingsRoutes from './routes/settings.js'
 import notificationsRoutes from './routes/notifications.js'
 import auditRoutes from './routes/audit.js'
+import usersRoutes from './routes/users.js'
 import openapi from './openapi.js'
 import { initSupabase } from './lib/supabase.js'
 
@@ -89,6 +90,7 @@ app.use('/api/knowledge-base', knowledgeBaseRoutes)
 app.use('/api/settings', settingsRoutes)
 app.use('/api/notifications', notificationsRoutes)
 app.use('/api/audit', auditRoutes)
+app.use('/api/admin/users', usersRoutes)
 
 app.get('/api-docs.json', (_req, res) => {
   res.json(openapi)

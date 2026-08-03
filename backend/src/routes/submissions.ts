@@ -40,7 +40,7 @@ router.get('/stats', async (_req: Request, res: Response) => {
   }
 })
 
-router.post('/', authenticate, requireRole('surveyor', 'officer', 'admin'), async (req: Request, res: Response) => {
+router.post('/', authenticate, requireRole('public', 'surveyor', 'officer', 'admin'), async (req: Request, res: Response) => {
   try {
     const { userId } = (req as any).user
     const id = uuid()

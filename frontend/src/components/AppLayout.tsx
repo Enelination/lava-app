@@ -11,6 +11,7 @@ import { KnowledgeBase } from './KnowledgeBase'
 import { Settings } from './Settings'
 import { Profile } from './Profile'
 import { AuditLogPage } from './AuditLog'
+import { UsersPage } from './Users'
 import { NotificationsBell } from './NotificationsBell'
 import { getInitials } from '../lib/utils'
 
@@ -20,6 +21,7 @@ const pages: Record<string, React.FC> = {
   sub: SubmitData,
   ver: VerificationQueue,
   kb: KnowledgeBase,
+  adm: UsersPage,
   cfg: Settings,
   acct: Profile,
   log: AuditLogPage,
@@ -31,6 +33,7 @@ const pageNames: Record<string, string> = {
   sub: 'Submit Data',
   ver: 'Verification Queue',
   kb: 'Knowledge Base',
+  adm: 'Users',
   cfg: 'Settings',
   acct: 'Account',
   log: 'Audit Trail',

@@ -93,6 +93,7 @@ export function Dashboard() {
               <span>Place</span>
               <span>Land use</span>
               <span>Price (GHS)</span>
+              <span>Trust</span>
               <span>Verified</span>
             </div>
             {loading ? (
@@ -112,6 +113,14 @@ export function Dashboard() {
                   </span>
                   <span>{r.land_use || '—'}</span>
                   <span className="recordPrice">{formatCurrency(r.price)}</span>
+                  <span className="trustScore">
+                    <i
+                      className={`dot ${
+                        r.trust_score === 'High' ? 'green' : r.trust_score === 'Medium' ? 'amber' : 'red'
+                      }`}
+                    />
+                    {r.trust_score || '—'}
+                  </span>
                   <span className="recordSmall">{formatDate(r.submitted_at)}</span>
                 </div>
               ))

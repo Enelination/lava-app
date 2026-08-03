@@ -24,13 +24,14 @@ router.post('/upload', authenticate, requireRole('admin'), async (req: Request, 
       return res.status(400).json({ error: 'Name and content are required' })
     }
 
+    const cleanContent = String(content).replace(/\u0000/g, '')
     const id = uuid()
-    const wordCount = content.split(/\s+/).length
+    const wordCount = cleanContent.split(/\s+/).length
 
     await insertRow('knowledge_base', {
       id,
       name,
-      content,
+      content: cleanContent,
       type: 'uploaded',
       word_count: wordCount,
     })

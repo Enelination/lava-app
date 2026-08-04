@@ -53,7 +53,7 @@ LAVA is a full‑stack web application for property valuation workflows in Ghana
 
 - **Monorepo** — `backend/` and `frontend/` are npm workspaces managed from the root `package.json`.
 - **Single server** — in production, Express serves both the `/api/*` REST API and the built React SPA (`frontend/dist`), so one Render service hosts everything.
-- **Auth model** — the backend issues its own signed JWTs (7‑day expiry). Passwords are bcrypt‑hashed. Supabase is used purely as a data store via PostgREST with the anon key; **RLS / service_role are not used** — authorization is enforced in the Express layer.
+- **Auth model** — the backend issues its own signed JWTs (7‑day expiry). Passwords are bcrypt‑hashed. Supabase is used purely as a data store via PostgREST with the anon key; **RLS / service_role are not used** — authorization is enforced in the Express layer. The user's role is **re-read from the database on every authenticated request**, so role changes (e.g. promoting a verifier) take effect immediately without re‑logging in.
 - **Audit & notifications** — verification changes, role changes and sign-ins (successful and failed) write to `audit_logs` (who/what/when). Entries older than **5 days are pruned automatically** (at startup, then every 6 hours). Verification changes also insert a row into `notifications` for the submission owner. The bell UI polls `GET /api/notifications` every 30 seconds.
 
 ---

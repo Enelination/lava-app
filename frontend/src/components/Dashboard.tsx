@@ -46,12 +46,14 @@ export function Dashboard() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return submissions
-    return submissions.filter((s) =>
-      [s.community, s.district, s.region, s.land_use, s.tenure_type, s.surveyor_name, s.licence_number]
-        .filter(Boolean)
-        .some((v) => String(v).toLowerCase().includes(q))
-    )
+    const list = q
+      ? submissions.filter((s) =>
+          [s.community, s.district, s.region, s.land_use, s.tenure_type, s.surveyor_name, s.licence_number]
+            .filter(Boolean)
+            .some((v) => String(v).toLowerCase().includes(q))
+        )
+      : [...submissions]
+    return list.sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime())
   }, [submissions, query])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))

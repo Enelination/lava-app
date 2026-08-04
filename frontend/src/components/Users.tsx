@@ -39,11 +39,15 @@ export function UsersPage() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    if (!q) return users
-    return users.filter((u) =>
-      [u.name, u.email, u.licence_number, u.organisation, u.role]
-        .filter(Boolean)
-        .some((v) => String(v).toLowerCase().includes(q))
+    const list = q
+      ? users.filter((u) =>
+          [u.name, u.email, u.licence_number, u.organisation, u.role]
+            .filter(Boolean)
+            .some((v) => String(v).toLowerCase().includes(q))
+        )
+      : [...users]
+    return list.sort(
+      (a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime()
     )
   }, [users, query])
 

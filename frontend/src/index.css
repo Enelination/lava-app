@@ -927,6 +927,25 @@
     margin-bottom: 2px;
   }
 
+  /* ---------- Generic list toolbar ---------- */
+  .listToolbar {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin: 0 0 22px;
+  }
+  .listToolbar .field {
+    min-width: 160px;
+  }
+  .listToolbar .field:first-child {
+    flex: 1 1 240px;
+    max-width: 340px;
+  }
+  .listToolbar .field:not(:first-child) {
+    flex: 0 1 200px;
+  }
+
   /* ---------- Queue ---------- */
   .queueCard {
     display: grid;

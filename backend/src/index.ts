@@ -132,3 +132,7 @@ pruneAuditLogs()
 setInterval(() => {
   pruneAuditLogs().catch((err) => console.warn('Audit log pruning failed:', err.message))
 }, 6 * 60 * 60 * 1000)
+
+initSupabase()
+  .then((ok) => console.log(ok ? 'Supabase init complete.' : 'Supabase init incomplete.'))
+  .catch((err) => console.warn('Supabase init failed:', err.message))

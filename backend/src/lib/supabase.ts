@@ -163,12 +163,16 @@ async function seedKnowledgeBase() {
 }
 
 async function seedSettings() {
-  const existing = await selectRows('settings', { where: { key: 'claude_api_key' }, select: 'key' })
   const claudeKey = process.env.CLAUDE_API_KEY || ''
-  if (existing.length === 0 && claudeKey) {
-    await insertRow('settings', { key: 'claude_api_key', value: claudeKey })
-    console.log('Seeded Claude API key setting.')
-  }
+  if (!claudeKey) return
+  const existing = await selectRows('settings', { where: { key: 'claude_api_key' }, select: 'value' })
+  if (existing.length && existing[0].value === claudeKey) return
+  await upsertRows('settings', [{ key: 'claude_api_key', value: claudeKey }], 'key')
+  console.log(
+    existing.length
+      ? 'Synced Claude API key from environment.'
+      : 'Seeded Claude API key setting.'
+  )
 }
 
 export async function pingSupabase(): Promise<{ ok: boolean; rows: number; error?: string }> {

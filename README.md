@@ -150,7 +150,7 @@ Open http://localhost:5173 — the Vite dev server proxies `/api` to the backend
 | `SUPABASE_URL` | Yes | Supabase project URL, e.g. `https://<ref>.supabase.co` |
 | `SUPABASE_ANON_KEY` | Yes | Supabase anon (publishable) key. Safe to use client-side; authz is in Express. |
 | `JWT_SECRET` | Yes* | Long random string used to sign sessions. **If unset, an ephemeral secret is generated and every restart logs everyone out.** |
-| `CLAUDE_API_KEY` | Yes (AI) | Anthropic API key for the AI assistant. |
+| `CLAUDE_API_KEY` | Yes (AI) | Anthropic API key for the AI assistant. **Auto-synced into the `settings` table on every startup, so it survives deploys.** You can also set it from the Settings tab. |
 | `APP_ORIGINS` | No | Comma-separated allowed CORS origins. Defaults to localhost, `*.onrender.com`, `*.vercel.app`. |
 | `PORT` | No | Backend port (default `3001`). |
 | `SEED_DEMO_USERS` | No | `1` to seed demo users at startup (only when `users` is empty). |
@@ -301,3 +301,4 @@ npm run build          # tsc -b && vite build
 - **The `submissions` table predates the app** (original data). `init-supabase.sql` only adds the `user_id` column and indexes to it — it never recreates it.
 - **Notifications only fire for submissions that have a `user_id` owner**; legacy rows without an owner are skipped silently.
 - **Audit logs are pruned after 5 days** (`pruneAuditLogs()` runs at startup and every 6 hours). This is a retention policy, not an archival system.
+- **The AI key persists across deploys.** It lives in the `settings` table (Supabase, durable). `initSupabase()` runs at startup and syncs `CLAUDE_API_KEY` into that table, so configure the key once in your platform's env vars (or the Settings tab) and it self-heals on every deploy.

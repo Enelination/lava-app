@@ -1151,6 +1151,30 @@
   }
   .bubble .md-prose > *:first-child { margin-top: 0; }
   .bubble .md-prose > *:last-child { margin-bottom: 0; }
+  .msgActions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+  .msgActionBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: #82939a;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 3px 6px;
+    border-radius: 4px;
+    transition: color 0.15s, background 0.15s;
+  }
+  .msgActionBtn:hover {
+    color: var(--deep);
+    background: rgba(9, 35, 58, 0.06);
+  }
   .bubble .md-prose p { margin: 8px 0; }
   .bubble .md-prose h1,
   .bubble .md-prose h2,

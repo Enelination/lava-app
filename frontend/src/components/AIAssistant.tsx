@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { Image, FileText, Loader2 } from 'lucide-react'
+import { Image, FileText, Loader2, Download } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import toast from 'react-hot-toast'
@@ -215,6 +215,22 @@ export function AIAssistant() {
     }
   }
 
+  const downloadMessage = (msg: ChatMessage) => {
+    const content =
+      typeof msg.content === 'string'
+        ? msg.content
+        : msg.content.map((b: any) => b.text || '').join('\n\n').trim()
+    const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `lava-response-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.md`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  }
+
   const renderContent = (msg: ChatMessage) => {
     const content = typeof msg.content === 'string' ? msg.content : msg.content.map((b: any) => b.text || '').join(' ')
 
@@ -307,6 +323,17 @@ export function AIAssistant() {
                 <div className="messageLabel">{msg.role === 'user' ? 'You' : 'LAVA'}</div>
                 <div className="bubble">
                   {renderContent(msg)}
+                  {msg.role === 'assistant' && msg.content !== greeting.content && (
+                    <div className="msgActions">
+                      <button
+                        onClick={() => downloadMessage(msg)}
+                        className="msgActionBtn"
+                        title="Download this response"
+                      >
+                        <Download size={12} /> Download
+                      </button>
+                    </div>
+                  )}
                   {msg.role === 'assistant' && i === chatMessages.length - 1 && !loading && (
                     <div className="sourceLine">
                       <i className="dot green" style={{ width: 6, height: 6, borderRadius: '50%' }} />

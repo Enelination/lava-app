@@ -215,20 +215,73 @@ export function AIAssistant() {
     }
   }
 
+  const saveBlob = (content: string, mime: string, filename: string) => {
+    const blob = new Blob([content], { type: mime })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  }
+
+  const csvCell = (value: string) => {
+    const v = value.trim()
+    return /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v
+  }
+
+  const markdownTablesToCsv = (markdown: string): string => {
+    const lines = markdown.split('\n')
+    const tables: string[] = []
+    let i = 0
+    while (i < lines.length) {
+      const line = lines[i].trim()
+      const next = (lines[i + 1] || '').trim()
+      if (line.startsWith('|') && /^\|?[\s:\-|]+\|?$/.test(next)) {
+        const rows: string[][] = []
+        const parseRow = (raw: string) =>
+          raw.replace(/^\||\|$/g, '').split('|').map((c) => csvCell(c))
+        rows.push(parseRow(line))
+        i += 2
+        while (i < lines.length && lines[i].trim().startsWith('|')) {
+          rows.push(parseRow(lines[i].trim()))
+          i++
+        }
+        tables.push(rows.map((r) => r.join(',')).join('\n'))
+      } else {
+        i++
+      }
+    }
+    return tables.join('\n\n')
+  }
+
   const downloadMessage = (msg: ChatMessage) => {
     const content =
       typeof msg.content === 'string'
         ? msg.content
         : msg.content.map((b: any) => b.text || '').join('\n\n').trim()
-    const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `lava-response-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.md`
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    URL.revokeObjectURL(url)
+    const ts = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')
+
+    const svgBlocks = [...content.matchAll(/```svg\s*([\s\S]*?)```/g)].map((m) => m[1].trim())
+    if (svgBlocks.length) {
+      svgBlocks.forEach((svg, idx) =>
+        saveBlob(svg, 'image/svg+xml', `lava-floorplan-${ts}${idx ? '-' + (idx + 1) : ''}.svg`)
+      )
+      toast.success(`Downloaded ${svgBlocks.length} floor plan image${svgBlocks.length > 1 ? 's' : ''}.`)
+      return
+    }
+
+    const csv = markdownTablesToCsv(content)
+    if (csv) {
+      saveBlob(csv, 'text/csv;charset=utf-8', `lava-tables-${ts}.csv`)
+      toast.success('Downloaded tables as a spreadsheet (opens in Excel).')
+      return
+    }
+
+    saveBlob(content, 'text/markdown;charset=utf-8', `lava-response-${ts}.md`)
+    toast.success('Downloaded response.')
   }
 
   const renderContent = (msg: ChatMessage) => {
@@ -328,7 +381,7 @@ export function AIAssistant() {
                       <button
                         onClick={() => downloadMessage(msg)}
                         className="msgActionBtn"
-                        title="Download this response"
+                        title="Download this response in the format it was presented (floor plan image, table spreadsheet, or document)"
                       >
                         <Download size={12} /> Download
                       </button>

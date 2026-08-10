@@ -1,16 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { RefreshCw, Check, Flag, X, Search } from 'lucide-react'
+import { RefreshCw, Check, Flag, X, Search, Trash2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { submissions as submissionsApi } from '../lib/api'
 import { useApp } from '../store/appStore'
+import { useAuth } from '../store/authStore'
 import { formatCurrency } from '../lib/utils'
 import type { Submission } from '../types'
 
 const filters = ['All', 'Pending', 'Verified', 'Flagged', 'Rejected']
 
 export function VerificationQueue() {
+  const { user } = useAuth()
   const { submissions, setSubmissions } = useApp()
+  const isAdmin = user?.role === 'admin'
   const [filter, setFilter] = useState('All')
   const [region, setRegion] = useState('All')
   const [minPrice, setMinPrice] = useState('')
@@ -44,6 +47,22 @@ export function VerificationQueue() {
       toast.success(`Record ${status.toLowerCase()}.`)
     } catch (err: any) {
       toast.error(err.message || 'Error updating.')
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    const record = submissions.find((s) => s.id === id)
+    if (!record) return
+    const location = [record.community, record.district].filter(Boolean).join(', ') || record.region
+    if (!window.confirm(`Delete the submission for ${location} (${formatCurrency(record.price)}) permanently? This cannot be undone.`)) {
+      return
+    }
+    try {
+      await submissionsApi.delete(id)
+      setSubmissions(submissions.filter((s) => s.id !== id))
+      toast.success('Submission deleted.')
+    } catch (err: any) {
+      toast.error(err.message || 'Error deleting submission.')
     }
   }
 
@@ -259,6 +278,11 @@ export function VerificationQueue() {
                     <span className="font-mono text-[9px] uppercase tracking-[0.08em] text-approve-text flex items-center gap-1.5">
                       <Check size={13} /> In database
                     </span>
+                  )}
+                  {isAdmin && (
+                    <button onClick={() => handleDelete(sub.id)} className="button delete" title="Delete permanently">
+                      <Trash2 size={13} /> Delete
+                    </button>
                   )}
                 </div>
               </div>

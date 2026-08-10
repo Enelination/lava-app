@@ -214,6 +214,7 @@ All endpoints are under `/api`. Auth-protected routes require `Authorization: Be
 | `GET` | `/api/submissions/stats` | public | Dashboard metrics |
 | `POST` | `/api/submissions` | any signed-in user | Create submission (owner set from token) |
 | `PATCH` | `/api/submissions/:id` | verifier, admin | Update status/trust → **writes audit log + notifies owner** |
+| `DELETE` | `/api/submissions/:id` | admin | Permanently delete a submission → **writes audit log** |
 | `GET` | `/api/notifications` | auth | Latest 50 notifications + unread count |
 | `PATCH` | `/api/notifications/read` | auth | Mark specific IDs (or all) as read |
 | `GET` | `/api/audit` | admin | Audit trail (actor, action, details, timestamp) |

@@ -152,6 +152,15 @@
     padding: 8px 16px;
     font-size: 11px;
   }
+  .button.delete {
+    background: #fde8e6;
+    color: #a8362d;
+    padding: 8px 16px;
+    font-size: 11px;
+  }
+  .button.delete:hover {
+    background: #f6d4d0;
+  }
   .button.block {
     width: 100%;
   }

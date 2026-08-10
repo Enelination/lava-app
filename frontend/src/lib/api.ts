@@ -79,6 +79,11 @@ export const submissions = {
       method: 'PATCH',
       body: JSON.stringify(data),
     }),
+
+  delete: (id: string) =>
+    request<{ success: boolean }>(`/submissions/${id}`, {
+      method: 'DELETE',
+    }),
 }
 
 export const ai = {

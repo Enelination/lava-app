@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express'
 import { v4 as uuid } from 'uuid'
-import { selectRows, countRows, insertRow, updateRows } from '../lib/supabase.js'
+import { selectRows, countRows, insertRow, updateRows, deleteRows } from '../lib/supabase.js'
 import { authenticate, requireRole } from '../middleware/auth.js'
 
 const VALID_STATUSES = ['Pending', 'Verified', 'Flagged', 'Rejected']
@@ -163,6 +163,39 @@ router.patch('/:id', authenticate, requireRole('officer', 'admin'), async (req: 
     }
 
     res.json(rows[0])
+  } catch (err: any) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+router.delete('/:id', authenticate, requireRole('admin'), async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params
+    const actor = (req as any).user
+
+    const current = (await selectRows('submissions', { where: { id } }))[0]
+    if (!current) return res.status(404).json({ error: 'Submission not found' })
+
+    await deleteRows('submissions', { id })
+
+    const actorRow = (await selectRows('users', { where: { id: actor.userId }, select: 'id,name' }))[0] || {}
+    await insertRow('audit_logs', {
+      actor_id: actor.userId,
+      actor_name: actorRow.name || actor.role,
+      action: 'submission_deleted',
+      target_type: 'submission',
+      target_id: id,
+      details: {
+        community: current.community,
+        district: current.district,
+        region: current.region,
+        price: current.price,
+        status: current.status,
+      },
+      created_at: new Date().toISOString(),
+    }).catch(() => {})
+
+    res.json({ success: true })
   } catch (err: any) {
     res.status(500).json({ error: err.message })
   }

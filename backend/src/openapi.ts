@@ -426,6 +426,19 @@ const openapi = {
           '404': { description: 'Submission not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
         },
       },
+      delete: {
+        tags: ['Submissions'],
+        summary: 'Delete a submission',
+        description:
+          'Admin only. Permanently deletes the submission and writes a `submission_deleted` audit-log entry. There is no undo.',
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' }, description: 'Submission UUID or ID' }],
+        responses: {
+          '200': { description: 'Deleted', content: { 'application/json': { schema: { $ref: '#/components/schemas/Success' } } } },
+          '403': { description: 'Admin only', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+          '404': { description: 'Submission not found', content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } } },
+        },
+      },
     },
     '/api/notifications': {
       get: {

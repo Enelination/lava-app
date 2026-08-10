@@ -9,6 +9,18 @@ const regions = [
   'Upper East', 'Upper West', 'Volta', 'Bono',
 ]
 
+const fieldLabels: Record<string, string> = {
+  region: 'Region',
+  community: 'Community',
+  land_use: 'Land use',
+  tenure_type: 'Tenure type',
+  price: 'Price',
+  land_size: 'Land size',
+  floor_area: 'Floor area',
+  building_age: 'Building age',
+  gps_coordinates: 'GPS coordinates',
+}
+
 function Field({ label, select, options = [], full, textarea, error, placeholder, ...rest }: any) {
   return (
     <label className={`field ${full ? 'full' : ''} ${error ? 'invalid' : ''}`} data-error={error ? 'true' : undefined}>
@@ -69,13 +81,13 @@ export function SubmitData() {
     })
   }
 
-  const validate = (): boolean => {
+  const validate = (): Record<string, string> => {
     const next: Record<string, string> = {}
-    if (!form.region) next.region = 'Please select a region.'
-    if (!form.community.trim()) next.community = 'Please enter the community or location.'
-    if (!form.land_use) next.land_use = 'Please select the land use.'
-    if (!form.tenure_type) next.tenure_type = 'Please select the tenure type.'
-    if (!form.price.trim()) next.price = 'Please enter the price in GHS.'
+    if (!form.region) next.region = 'Required — select a region.'
+    if (!form.community.trim()) next.community = 'Required — enter the community or location.'
+    if (!form.land_use) next.land_use = 'Required — select the land use.'
+    if (!form.tenure_type) next.tenure_type = 'Required — select the tenure type.'
+    if (!form.price.trim()) next.price = 'Required — enter the price in GHS.'
     else if (Number.isNaN(parseFloat(form.price)) || parseFloat(form.price) <= 0)
       next.price = 'Price must be a number greater than 0.'
     if (form.land_size && (Number.isNaN(parseFloat(form.land_size)) || parseFloat(form.land_size) <= 0))
@@ -87,7 +99,13 @@ export function SubmitData() {
     if (form.gps_coordinates.trim() && !/^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/.test(form.gps_coordinates.trim()))
       next.gps_coordinates = 'Use decimal format, e.g. 5.6037, -0.1870.'
     setErrors(next)
-    return Object.keys(next).length === 0
+    return next
+  }
+
+  const errorSummary = (errs: Record<string, string>): string => {
+    const names = Object.keys(errs).map((k) => fieldLabels[k] || k)
+    if (names.length === 1) return `Please fill in: ${names[0]}.`
+    return `Please fill in the required fields: ${names.join(', ')}.`
   }
 
   const focusFirstError = () => {
@@ -99,9 +117,10 @@ export function SubmitData() {
   }
 
   const handleSubmit = async () => {
-    if (!validate()) {
+    const nextErrors = validate()
+    if (Object.keys(nextErrors).length > 0) {
       focusFirstError()
-      toast.error('Please fix the highlighted fields.')
+      toast.error(errorSummary(nextErrors))
       return
     }
     setLoading(true)
@@ -247,6 +266,23 @@ export function SubmitData() {
             </div>
           )}
         </div>
+
+        {Object.keys(errors).length > 0 && (
+          <div className="formErrorSummary" role="alert">
+            <div className="formErrorTitle">
+              {Object.keys(errors).length === 1
+                ? '1 field needs attention before you can submit'
+                : `${Object.keys(errors).length} fields need attention before you can submit`}
+            </div>
+            <ul>
+              {Object.keys(errors).map((k) => (
+                <li key={k}>
+                  <strong>{fieldLabels[k] || k}:</strong> {errors[k]}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <div className="submitBar">
           <p className="text-[11px] text-muted max-w-md">

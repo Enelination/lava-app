@@ -814,6 +814,38 @@
     font-weight: 600;
   }
 
+  .guestBanner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 18px;
+    padding: 18px 22px;
+    border-radius: 10px;
+    background: linear-gradient(145deg, #e9f3ed, #f8f5ed);
+    border: 1px solid #d7e4da;
+    flex-wrap: wrap;
+  }
+  .guestBannerText {
+    min-width: 0;
+  }
+  .guestBannerTitle {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .guestBannerText p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .guestBannerActions {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
   /* ---------- Insight ---------- */
   .insight {
     border-radius: 10px;

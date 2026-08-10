@@ -7,12 +7,14 @@ import { useAuth } from '../store/authStore'
 import { formatCurrency, formatDate } from '../lib/utils'
 
 const PER_PAGE = 10
+const GUEST_LIMIT = 3
 
 const inputCls =
   'w-full border border-line rounded-sm2 bg-paper px-3 py-2.5 text-xs text-ink outline-none focus:border-muted transition-colors placeholder:text-[#b0bcc3]'
 
 export function Dashboard() {
-  const { user } = useAuth()
+  const { user, openAuth } = useAuth()
+  const isGuest = !user
   const { stats, setStats, submissions, setSubmissions, setActivePage } = useApp()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -59,6 +61,7 @@ export function Dashboard() {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
   const currentPage = Math.min(page, totalPages)
   const pageItems = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE)
+  const shownItems = isGuest ? pageItems.slice(0, GUEST_LIMIT) : pageItems
 
   return (
     <div>
@@ -105,25 +108,50 @@ export function Dashboard() {
         </div>
       </div>
 
+      {isGuest && (
+        <div className="guestBanner">
+          <div className="guestBannerText">
+            <div className="guestBannerTitle">You're viewing a preview of the LAVA database.</div>
+            <p>
+              Sign in to see all {filtered.length} records with full details, plus the complete
+              workspace.
+            </p>
+          </div>
+          <div className="guestBannerActions">
+            <button className="button" onClick={() => openAuth(0)}>
+              Sign in
+            </button>
+            <button className="button outline" onClick={() => openAuth(1)}>
+              Create account
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="contentGrid mt-[18px]">
         <section className="panel">
           <div className="panelHead">
             <div>
               <h3>Records</h3>
               <p>
-                {filtered.length === 1 ? '1 record' : `${filtered.length} records`} submitted to
-                the database.
+                {isGuest
+                  ? `Showing ${Math.min(GUEST_LIMIT, filtered.length)} of ${filtered.length} records — sign in to see the rest.`
+                  : filtered.length === 1
+                    ? '1 record submitted to the database.'
+                    : `${filtered.length} records submitted to the database.`}
               </p>
             </div>
-            <div className="relative w-full max-w-[220px]">
-              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
-              <input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search records…"
-                className={`${inputCls} pl-8`}
-              />
-            </div>
+            {!isGuest && (
+              <div className="relative w-full max-w-[220px]">
+                <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search records…"
+                  className={`${inputCls} pl-8`}
+                />
+              </div>
+            )}
           </div>
           <div className="records">
             <div className="recordHeader">
@@ -137,14 +165,14 @@ export function Dashboard() {
               <div className="record">
                 <span className="recordSmall">Loading records…</span>
               </div>
-            ) : pageItems.length === 0 ? (
+            ) : shownItems.length === 0 ? (
               <div className="record">
                 <span className="recordSmall">
                   {query.trim() ? 'No records match your search.' : 'No records yet.'}
                 </span>
               </div>
             ) : (
-              pageItems.map((r) => (
+              shownItems.map((r) => (
                 <div className="record" key={r.id}>
                   <span>
                     {r.community}
@@ -165,7 +193,7 @@ export function Dashboard() {
               ))
             )}
           </div>
-          {filtered.length > PER_PAGE && (
+          {!isGuest && filtered.length > PER_PAGE && (
             <div className="flex items-center justify-between gap-3 px-6 py-4 border-t border-line flex-wrap">
               <span className="font-mono text-[11px] text-muted">
                 Page {currentPage} of {totalPages}

@@ -7,6 +7,8 @@ interface AuthState {
   token: string | null
   loading: boolean
   initialized: boolean
+  showAuth: boolean
+  authTab: number
 
   login: (email: string, password: string) => Promise<void>
   loginByLicence: (licence: string, password: string) => Promise<void>
@@ -14,6 +16,8 @@ interface AuthState {
   logout: () => void
   setUser: (user: User) => void
   init: () => Promise<void>
+  openAuth: (tab: number) => void
+  closeAuth: () => void
 }
 
 export const useAuth = create<AuthState>((set, get) => ({
@@ -21,6 +25,8 @@ export const useAuth = create<AuthState>((set, get) => ({
   token: null,
   loading: false,
   initialized: false,
+  showAuth: false,
+  authTab: 0,
 
   init: async () => {
     const token = localStorage.getItem('lava_token')
@@ -79,4 +85,7 @@ export const useAuth = create<AuthState>((set, get) => ({
   },
 
   setUser: (user) => set({ user }),
+
+  openAuth: (tab) => set({ showAuth: true, authTab: tab }),
+  closeAuth: () => set({ showAuth: false }),
 }))

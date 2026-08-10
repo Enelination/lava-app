@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Navbar } from './Navbar'
+import { AuthModal } from './AuthModal'
 import { useAuth } from '../store/authStore'
 import { useApp } from '../store/appStore'
 import { Dashboard } from './Dashboard'
@@ -40,7 +41,7 @@ const pageNames: Record<string, string> = {
 }
 
 export function AppLayout() {
-  const { user } = useAuth()
+  const { user, showAuth, authTab, closeAuth } = useAuth()
   const { activePage, setActivePage, navCollapsed } = useApp()
 
   useEffect(() => {
@@ -92,6 +93,10 @@ export function AppLayout() {
           </AnimatePresence>
         </main>
       </div>
+
+      <AnimatePresence>
+        {showAuth && <AuthModal initialTab={authTab} onClose={closeAuth} />}
+      </AnimatePresence>
     </div>
   )
 }

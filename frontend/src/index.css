@@ -1803,6 +1803,53 @@
     justify-content: center;
     transition: background 0.15s, color 0.15s;
   }
+  .confirmModal {
+    background: var(--paper);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    padding: 30px 32px;
+    position: relative;
+    box-shadow: 0 30px 80px -20px rgba(3, 19, 31, 0.4);
+    text-align: center;
+  }
+  .confirmIcon {
+    width: 46px;
+    height: 46px;
+    margin: 0 auto 16px;
+    border-radius: 12px;
+    background: #fde8e6;
+    color: #a8362d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .confirmModal h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .confirmModal > p {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+  .confirmModal > p strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .confirmActions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  .confirmActions .button {
+    min-width: 110px;
+  }
   .authClose:hover {
     background: var(--cream);
     color: var(--ink);

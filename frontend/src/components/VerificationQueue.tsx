@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { RefreshCw, Check, Flag, X, Search, Trash2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { submissions as submissionsApi } from '../lib/api'
@@ -21,6 +21,8 @@ export function VerificationQueue() {
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState('newest')
   const [loading, setLoading] = useState(true)
+  const [deleteTarget, setDeleteTarget] = useState<Submission | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   const loadAll = async () => {
     setLoading(true)
@@ -50,21 +52,31 @@ export function VerificationQueue() {
     }
   }
 
-  const handleDelete = async (id: string) => {
-    const record = submissions.find((s) => s.id === id)
-    if (!record) return
-    const location = [record.community, record.district].filter(Boolean).join(', ') || record.region
-    if (!window.confirm(`Delete the submission for ${location} (${formatCurrency(record.price)}) permanently? This cannot be undone.`)) {
-      return
-    }
+  const locationFor = (s: Submission) =>
+    [s.community, s.district].filter(Boolean).join(', ') || s.region
+
+  const confirmDelete = async (record: Submission) => {
+    setDeleting(true)
     try {
-      await submissionsApi.delete(id)
-      setSubmissions(submissions.filter((s) => s.id !== id))
+      await submissionsApi.delete(record.id)
+      setSubmissions(submissions.filter((s) => s.id !== record.id))
       toast.success('Submission deleted.')
+      setDeleteTarget(null)
     } catch (err: any) {
       toast.error(err.message || 'Error deleting submission.')
+    } finally {
+      setDeleting(false)
     }
   }
+
+  useEffect(() => {
+    if (!deleteTarget) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setDeleteTarget(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [deleteTarget])
 
   const regions = useMemo(
     () =>
@@ -280,7 +292,7 @@ export function VerificationQueue() {
                     </span>
                   )}
                   {isAdmin && (
-                    <button onClick={() => handleDelete(sub.id)} className="button delete" title="Delete permanently">
+                    <button onClick={() => setDeleteTarget(sub)} className="button delete" title="Delete permanently">
                       <Trash2 size={13} /> Delete
                     </button>
                   )}
@@ -290,6 +302,49 @@ export function VerificationQueue() {
           ))}
         </div>
       )}
+
+      <AnimatePresence>
+        {deleteTarget && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="modalWrap"
+            onClick={() => !deleting && setDeleteTarget(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 12 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+              onClick={(e) => e.stopPropagation()}
+              className="confirmModal"
+            >
+              <button onClick={() => setDeleteTarget(null)} className="authClose" aria-label="Close">
+                <X size={16} />
+              </button>
+              <div className="confirmIcon">
+                <Trash2 size={20} />
+              </div>
+              <h3>Delete this submission?</h3>
+              <p>
+                This will permanently delete the submission for{' '}
+                <strong>{locationFor(deleteTarget)}</strong> (
+                <strong>{formatCurrency(deleteTarget.price)}</strong>). This action cannot be
+                undone.
+              </p>
+              <div className="confirmActions">
+                <button className="button outline" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+                  Cancel
+                </button>
+                <button className="button delete" onClick={() => confirmDelete(deleteTarget)} disabled={deleting}>
+                  {deleting ? 'Deleting…' : 'Delete permanently'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

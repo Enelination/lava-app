@@ -111,7 +111,7 @@ export function UsersPage() {
             filtered.map((u) => (
               <div className="record userRow" key={u.id}>
                 <span className="min-w-0">
-                  <span className="block text-ink font-semibold text-[12px] truncate">
+                  <span className="block text-ink font-semibold text-[13px] truncate">
                     {u.name} {me?.id === u.id && <span className="text-muted font-normal">(you)</span>}
                   </span>
                   <span className="recordSmall block truncate">{u.email}</span>
@@ -119,7 +119,7 @@ export function UsersPage() {
                 <span className="recordSmall">{u.licence_number || '—'}</span>
                 <span>
                   <span
-                    className="font-mono text-[10px] uppercase tracking-[0.08em] px-2 py-0.5 rounded"
+                    className="font-mono text-[11px] uppercase tracking-[0.08em] px-2 py-0.5 rounded"
                     style={{
                       background:
                         u.role === 'admin'

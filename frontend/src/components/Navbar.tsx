@@ -142,7 +142,7 @@ export function Navbar() {
       <div className="lg:hidden fixed top-0 inset-x-0 z-40 bg-deep text-white px-4 h-16 flex items-center justify-between">
         <button onClick={() => navigate('/')} className="flex items-center gap-2.5 bg-transparent border-none cursor-pointer">
           <img src="/logo.png" alt="LAVA" className="logoImg" style={{ width: 36, height: 36 }} />
-          <span className="logoWord" style={{ fontSize: 11 }}>LAVA</span>
+          <span className="logoWord" style={{ fontSize: 12 }}>LAVA</span>
         </button>
         <div className="flex items-center gap-3">
           {installEvt && !installed && (

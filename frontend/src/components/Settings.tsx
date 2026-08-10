@@ -106,7 +106,7 @@ export function Settings() {
             <p>Land Valuation Assistant</p>
           </div>
         </div>
-        <p className="text-[13px] leading-relaxed text-muted">
+        <p className="text-[14px] leading-relaxed text-muted">
           LAVA is a prototype collaborative land data platform developed as a GhIS qualification thesis
           project by Louisa Hans-Jorie. Built on GhIS valuation standards, Ghana Land Act 2020 (Act 1036),
           Stamp Duty Act (Act 689), and Market Comparison Analysis methodology.

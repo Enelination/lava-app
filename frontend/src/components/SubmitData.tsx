@@ -173,10 +173,10 @@ export function SubmitData() {
           <div className="sectionTitle">
             <span className="sectionNum">01</span>
             <div>
-              <h3 style={{ fontSize: 11, fontWeight: 500, color: 'var(--muted)', textTransform: 'none', letterSpacing: '0.02em' }}>
+              <h3 style={{ fontSize: 12, fontWeight: 500, color: 'var(--muted)', textTransform: 'none', letterSpacing: '0.02em' }}>
                 Property details
               </h3>
-              <p className="font-sans text-[11px] text-muted mt-0.5" style={{ textTransform: 'none' }}>
+              <p className="font-sans text-[12px] text-muted mt-0.5" style={{ textTransform: 'none' }}>
                 Describe the asset and its location.
               </p>
             </div>
@@ -216,7 +216,7 @@ export function SubmitData() {
               <div className="sectionTitle mt-6" style={{ color: 'var(--ink)' }}>
                 <span className="sectionNum">·</span>
                 <div>
-                  <h3 style={{ fontSize: 11, fontWeight: 500, color: 'var(--ink)', textTransform: 'none', letterSpacing: '0.02em' }}>
+                  <h3 style={{ fontSize: 12, fontWeight: 500, color: 'var(--ink)', textTransform: 'none', letterSpacing: '0.02em' }}>
                     Building details
                   </h3>
                 </div>
@@ -237,10 +237,10 @@ export function SubmitData() {
           <div className="sectionTitle">
             <span className="sectionNum">02</span>
             <div>
-              <h3 style={{ fontSize: 11, fontWeight: 500, color: 'var(--muted)', textTransform: 'none', letterSpacing: '0.02em' }}>
+              <h3 style={{ fontSize: 12, fontWeight: 500, color: 'var(--muted)', textTransform: 'none', letterSpacing: '0.02em' }}>
                 Transaction details
               </h3>
-              <p className="font-sans text-[11px] text-muted mt-0.5" style={{ textTransform: 'none' }}>
+              <p className="font-sans text-[12px] text-muted mt-0.5" style={{ textTransform: 'none' }}>
                 Help reviewers establish a reliable market record.
               </p>
             </div>
@@ -255,7 +255,7 @@ export function SubmitData() {
 
           {user && (
             <div className="autoBox mt-6">
-              <div className="font-mono text-[9px] uppercase tracking-[0.09em] text-muted mb-3">
+              <div className="font-mono text-[10px] uppercase tracking-[0.09em] text-muted mb-3">
                 Surveyor details (auto-filled)
               </div>
               <div className="autoRow">
@@ -285,7 +285,7 @@ export function SubmitData() {
         )}
 
         <div className="submitBar">
-          <p className="text-[11px] text-muted max-w-md">
+          <p className="text-[12px] text-muted max-w-md">
             By submitting, you confirm that this information is accurate to the best of your professional knowledge.
           </p>
           <button type="submit" disabled={loading} className="button">

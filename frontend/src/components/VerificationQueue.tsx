@@ -232,7 +232,7 @@ export function VerificationQueue() {
                   <div className="queueTitle flex items-center gap-2 flex-wrap">
                     {sub.community}, {sub.district || sub.region}
                     {sub.property_type === 'Developed' && (
-                      <span className="font-mono text-[8px] uppercase tracking-[0.08em] bg-flag-bg text-flag-text px-2 py-0.5 rounded">
+                      <span className="font-mono text-[9px] uppercase tracking-[0.08em] bg-flag-bg text-flag-text px-2 py-0.5 rounded">
                         Developed
                       </span>
                     )}
@@ -258,8 +258,8 @@ export function VerificationQueue() {
               </div>
 
               <div className="queuePrice text-right">
-                <div className="recordSmall font-mono text-[9px] text-muted mb-1">Reported price</div>
-                <div className="recordPrice text-[14px] font-semibold text-ink">
+                <div className="recordSmall font-mono text-[10px] text-muted mb-1">Reported price</div>
+                <div className="recordPrice text-[15px] font-semibold text-ink">
                   {formatCurrency(sub.price)}
                 </div>
               </div>
@@ -287,7 +287,7 @@ export function VerificationQueue() {
                     </button>
                   )}
                   {sub.status === 'Verified' && (
-                    <span className="font-mono text-[9px] uppercase tracking-[0.08em] text-approve-text flex items-center gap-1.5">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-approve-text flex items-center gap-1.5">
                       <Check size={13} /> In database
                     </span>
                   )}

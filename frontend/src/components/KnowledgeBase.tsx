@@ -177,7 +177,7 @@ export function KnowledgeBase() {
           {composer && (
             <section className="panel p-5">
               <div className="flex items-center justify-between mb-4">
-                <h4 className="text-[13px] font-semibold text-ink">
+                <h4 className="text-[14px] font-semibold text-ink">
                   {composer.mode === 'edit' ? 'Edit document' : 'Add a document'}
                 </h4>
                 <button
@@ -259,7 +259,7 @@ export function KnowledgeBase() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-[9px] uppercase tracking-[0.06em] bg-approve-bg text-approve-text px-2.5 py-1 rounded">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.06em] bg-approve-bg text-approve-text px-2.5 py-1 rounded">
                     Active
                   </span>
                   {doc.type === 'uploaded' && (

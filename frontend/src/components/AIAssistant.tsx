@@ -299,7 +299,7 @@ export function AIAssistant() {
                 if (svg.includes('<svg')) {
                   return (
                     <div className="mt-3">
-                      <div className="font-mono text-[9px] uppercase tracking-[0.09em] text-muted mb-2">
+                      <div className="font-mono text-[10px] uppercase tracking-[0.09em] text-muted mb-2">
                         Redrawn floor plan
                       </div>
                       <div dangerouslySetInnerHTML={{ __html: svg }} />
@@ -355,7 +355,7 @@ export function AIAssistant() {
               {user && chatMessages.length > 1 && (
                 <button
                   onClick={handleClear}
-                  className="text-[10px] font-semibold text-muted hover:text-red bg-transparent border-none cursor-pointer"
+                  className="text-[11px] font-semibold text-muted hover:text-red bg-transparent border-none cursor-pointer"
                 >
                   Clear chat
                 </button>

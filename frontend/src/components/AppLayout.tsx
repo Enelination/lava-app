@@ -62,17 +62,17 @@ export function AppLayout() {
           <div className="topbarUser">
             <NotificationsBell />
             <div className="hidden sm:block text-right">
-              <div className="text-[11px] font-semibold text-ink leading-tight">
+              <div className="text-[12px] font-semibold text-ink leading-tight">
                 {user?.name?.split(' ')[0] || 'Guest'}
               </div>
-              <div className="font-mono text-[9px] text-muted">{user?.licence_number || ''}</div>
+              <div className="font-mono text-[10px] text-muted">{user?.licence_number || ''}</div>
             </div>
             <button
               onClick={() => setActivePage('acct')}
               title="Account settings"
               className="bg-transparent border-none cursor-pointer p-0"
             >
-              <div className="avatar" style={{ width: 32, height: 32, borderRadius: 8, fontSize: 10 }}>
+              <div className="avatar" style={{ width: 32, height: 32, borderRadius: 8, fontSize: 11 }}>
                 {getInitials(user?.name || 'User')}
               </div>
             </button>

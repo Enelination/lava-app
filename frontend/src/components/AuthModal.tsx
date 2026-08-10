@@ -186,7 +186,7 @@ export function AuthModal({ initialTab, onClose }: Props) {
             <div className="field">
               <label>GhIS Licence Number</label>
               <input type="text" value={regLicence} onChange={(e) => setRegLicence(e.target.value)} placeholder="e.g. GhIS/VS/0042" className={inputCls} />
-              <span className="block text-[11px] text-muted mt-1.5">Leave blank if you are a student or researcher. Required only to submit data.</span>
+              <span className="block text-[12px] text-muted mt-1.5">Leave blank if you are a student or researcher. Required only to submit data.</span>
             </div>
             <div className="field">
               <label>Organisation / Institution</label>

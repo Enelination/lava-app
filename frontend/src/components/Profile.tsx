@@ -171,7 +171,7 @@ export function Profile() {
               className={inputCls}
             />
             {user?.role === 'public' && (
-              <p className="text-[11px] text-muted mt-1.5">Adding a licence number upgrades your account to Surveyor.</p>
+              <p className="text-[12px] text-muted mt-1.5">Adding a licence number upgrades your account to Surveyor.</p>
             )}
           </div>
 

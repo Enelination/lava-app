@@ -92,7 +92,7 @@ export function Dashboard() {
             {loading ? '—' : stats?.pending ?? 0}
           </div>
           <div className="metricLabel">Awaiting review</div>
-          <div className="font-mono text-[9px] text-muted flex items-center gap-2">
+          <div className="font-mono text-[10px] text-muted flex items-center gap-2">
             <span className="dot green" /> Live from database
           </div>
         </div>
@@ -101,7 +101,7 @@ export function Dashboard() {
             {loading ? '—' : stats?.regions ?? 0}
           </div>
           <div className="metricLabel">Regions covered</div>
-          <div className="font-mono text-[9px] text-muted">Growing network</div>
+          <div className="font-mono text-[10px] text-muted">Growing network</div>
         </div>
       </div>
 
@@ -167,7 +167,7 @@ export function Dashboard() {
           </div>
           {filtered.length > PER_PAGE && (
             <div className="flex items-center justify-between gap-3 px-6 py-4 border-t border-line flex-wrap">
-              <span className="font-mono text-[10px] text-muted">
+              <span className="font-mono text-[11px] text-muted">
                 Page {currentPage} of {totalPages}
               </span>
               <div className="flex items-center gap-2">

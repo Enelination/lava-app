@@ -1482,6 +1482,21 @@
   .field input:focus, .field select:focus, .field textarea:focus {
     border-color: var(--muted);
   }
+  .field.invalid input, .field.invalid select, .field.invalid textarea {
+    border-color: #d64545;
+    background: #fff8f7;
+  }
+  .field.invalid input:focus, .field.invalid select:focus, .field.invalid textarea:focus {
+    border-color: #d64545;
+  }
+  .fieldError {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.02em;
+    color: #d64545;
+    margin-top: 5px;
+  }
   .field input::placeholder, .field textarea::placeholder {
     color: #b0bcc3;
   }

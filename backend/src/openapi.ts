@@ -374,7 +374,7 @@ const openapi = {
       post: {
         tags: ['Submissions'],
         summary: 'Create a submission',
-        description: 'Any signed-in user (public, surveyor, officer or admin) can submit. Owner and surveyor identity are taken from the token, not the body. New submissions start as `Pending` / `Medium`.',
+        description: 'Any signed-in user (public, surveyor, officer or admin) can submit. Owner and surveyor identity are taken from the token, not the body. New submissions start as `Pending` with **no trust score** — the trust score is assigned by the verifying officer or admin.',
         security: [{ bearerAuth: [] }],
         requestBody: {
           required: true,

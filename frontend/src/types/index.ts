@@ -35,7 +35,7 @@ export interface Submission {
   organisation: string
   email: string
   status: 'Pending' | 'Verified' | 'Flagged' | 'Rejected'
-  trust_score: 'High' | 'Medium' | 'Low'
+  trust_score: 'High' | 'Medium' | 'Low' | null
   submitted_at: string
   verified_at: string | null
   user_id: string

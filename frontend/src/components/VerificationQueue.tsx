@@ -52,6 +52,18 @@ export function VerificationQueue() {
     }
   }
 
+  const handleTrust = async (id: string, trust_score: string) => {
+    try {
+      await submissionsApi.update(id, { trust_score })
+      setSubmissions(
+        submissions.map((s) => (s.id === id ? { ...s, trust_score: trust_score as Submission['trust_score'] } : s))
+      )
+      toast.success(`Trust score set to ${trust_score}.`)
+    } catch (err: any) {
+      toast.error(err.message || 'Error updating trust score.')
+    }
+  }
+
   const locationFor = (s: Submission) =>
     [s.community, s.district].filter(Boolean).join(', ') || s.region
 
@@ -267,9 +279,26 @@ export function VerificationQueue() {
               <div className="queueCell">
                 <span className={`status ${sub.status}`}>{sub.status}</span>
                 <span className="trustScore">
-                  <i className={`dot ${sub.trust_score === 'High' ? 'green' : sub.trust_score === 'Medium' ? 'amber' : 'red'}`} />
-                  {sub.trust_score} trust
+                  <i
+                    className={`dot ${
+                      sub.trust_score === 'High' ? 'green' : sub.trust_score === 'Medium' ? 'amber' : sub.trust_score === 'Low' ? 'red' : ''
+                    }`}
+                  />
+                  {sub.trust_score ? `${sub.trust_score} trust` : 'No trust score'}
                 </span>
+                <select
+                  className="trustSelect"
+                  value={sub.trust_score || ''}
+                  onChange={(e) => handleTrust(sub.id, e.target.value)}
+                  title="Assign trust score"
+                >
+                  <option value="" disabled>
+                    Assign trust…
+                  </option>
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
                 <div className="queueActions">
                   {sub.status !== 'Verified' && (
                     <button onClick={() => handleStatus(sub.id, 'Verified')} className="button approve" title="Approve">

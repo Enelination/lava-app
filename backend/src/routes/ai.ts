@@ -80,7 +80,7 @@ router.post('/chat', optionalAuth, async (req: Request, res: Response) => {
     })
     const dbCtx = verifiedRecs.length
       ? verifiedRecs.map((r: any) =>
-          `- ${r.community}, ${r.district || ''}, ${r.region} | ${r.property_type === 'Developed' ? 'DEVELOPED' : 'LAND'} | ${r.land_size || '?'} ${r.unit || ''} | ${r.land_use} | ${r.tenure_type}${r.property_type === 'Developed' ? ` | ${r.bedrooms ? r.bedrooms + ' bed' : ''}${r.bathrooms ? ', ' + r.bathrooms + ' bath' : ''}${r.storeys ? ', ' + r.storeys : ''}${r.floor_area ? ', ' + r.floor_area + ' sq.m' : ''}${r.building_age ? ', ' + r.building_age + 'yrs' : ''}${r.condition ? ', ' + r.condition : ''}` : ''} | GHS ${Number(r.price).toLocaleString()} | ${r.transaction_date || 'No date'} | Trust: ${r.trust_score}`
+          `- ${r.community}, ${r.district || ''}, ${r.region} | ${r.property_type === 'Developed' ? 'DEVELOPED' : 'LAND'} | ${r.land_size || '?'} ${r.unit || ''} | ${r.land_use} | ${r.tenure_type}${r.property_type === 'Developed' ? ` | ${r.bedrooms ? r.bedrooms + ' bed' : ''}${r.bathrooms ? ', ' + r.bathrooms + ' bath' : ''}${r.storeys ? ', ' + r.storeys : ''}${r.floor_area ? ', ' + r.floor_area + ' sq.m' : ''}${r.building_age ? ', ' + r.building_age + 'yrs' : ''}${r.condition ? ', ' + r.condition : ''}` : ''} | GHS ${Number(r.price).toLocaleString()} | ${r.transaction_date || 'No date'} | Trust: ${r.trust_score || 'Unrated'}`
         ).join('\n')
       : 'No verified records yet.'
 

@@ -1043,15 +1043,25 @@
     align-items: center;
     gap: 6px;
   }
-  .dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    display: inline-block;
-  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; background: #c4cfcb; }
   .dot.green { background: #4caa80; }
   .dot.amber { background: #e6b75c; }
   .dot.red { background: #a84942; }
+  .trustSelect {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--paper);
+    padding: 4px 8px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .trustSelect:focus {
+    border-color: var(--muted);
+  }
 
   /* ---------- Assistant ---------- */
   .assistant {

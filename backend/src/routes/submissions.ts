@@ -75,7 +75,7 @@ router.post('/', authenticate, requireRole('public', 'surveyor', 'officer', 'adm
       organisation: submitter.organisation || '',
       email: submitter.email || '',
       status: 'Pending',
-      trust_score: 'Medium',
+      trust_score: null,
       user_id: userId,
       submitted_at: new Date().toISOString(),
     })

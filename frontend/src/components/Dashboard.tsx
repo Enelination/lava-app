@@ -48,13 +48,14 @@ export function Dashboard() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
+    const verified = submissions.filter((s) => s.status === 'Verified')
     const list = q
-      ? submissions.filter((s) =>
+      ? verified.filter((s) =>
           [s.community, s.district, s.region, s.land_use, s.tenure_type, s.surveyor_name, s.licence_number]
             .filter(Boolean)
             .some((v) => String(v).toLowerCase().includes(q))
         )
-      : [...submissions]
+      : verified
     return list.sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime())
   }, [submissions, query])
 
@@ -188,7 +189,7 @@ export function Dashboard() {
                     />
                     {r.trust_score || '—'}
                   </span>
-                  <span className="recordSmall">{formatDate(r.submitted_at)}</span>
+                  <span className="recordSmall">{formatDate(r.verified_at || r.submitted_at)}</span>
                 </div>
               ))
             )}

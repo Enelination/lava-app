@@ -15,7 +15,7 @@ export default function App() {
     return (
       <div className="min-h-screen bg-deep flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <img src="/logo.png" alt="LAVA" className="logoImg" style={{ width: 64, height: 64 }} />
+          <img src="/logo.png" alt="LAVA" className="logoImg" style={{ width: 120, height: 120, borderRadius: 24 }} />
           <div className="flex gap-1.5">
             <span className="w-2 h-2 bg-gold rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
             <span className="w-2 h-2 bg-gold rounded-full animate-bounce" style={{ animationDelay: '0.15s' }} />

@@ -3,11 +3,13 @@ import bcrypt from 'bcryptjs'
 import { v4 as uuid } from 'uuid'
 import { selectRows, insertRow, updateRows } from '../lib/supabase.js'
 import { signToken, authenticate } from '../middleware/auth.js'
+import { validate } from '../middleware/validate.js'
+import { registerSchema, loginSchema, profileSchema, changePasswordSchema } from '../schemas.js'
 import type { User } from '../types.js'
 
 const router = Router()
 
-router.post('/register', async (req: Request, res: Response) => {
+router.post('/register', validate(registerSchema), async (req: Request, res: Response) => {
   try {
     const { name, email, password, licence_number, organisation } = req.body
     if (!name || !email || !password) {
@@ -53,7 +55,7 @@ router.post('/register', async (req: Request, res: Response) => {
   }
 })
 
-router.post('/login', async (req: Request, res: Response) => {
+router.post('/login', validate(loginSchema), async (req: Request, res: Response) => {
   try {
     const { email, licence_number, password } = req.body
     if ((!email && !licence_number) || !password) {
@@ -110,7 +112,7 @@ router.post('/login', async (req: Request, res: Response) => {
   }
 })
 
-router.patch('/profile', authenticate, async (req: Request, res: Response) => {
+router.patch('/profile', authenticate, validate(profileSchema), async (req: Request, res: Response) => {
   try {
     const { userId } = (req as any).user
     const { name, email, licence_number, organisation } = req.body
@@ -155,7 +157,7 @@ router.patch('/profile', authenticate, async (req: Request, res: Response) => {
   }
 })
 
-router.post('/change-password', authenticate, async (req: Request, res: Response) => {
+router.post('/change-password', authenticate, validate(changePasswordSchema), async (req: Request, res: Response) => {
   try {
     const { userId } = (req as any).user
     const { current_password, new_password } = req.body

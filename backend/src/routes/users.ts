@@ -1,8 +1,8 @@
 import { Router, Request, Response } from 'express'
 import { selectRows, updateRows, insertRow } from '../lib/supabase.js'
 import { authenticate, requireRole } from '../middleware/auth.js'
-
-const VALID_ROLES = ['public', 'surveyor', 'officer', 'admin']
+import { validate } from '../middleware/validate.js'
+import { updateRoleSchema } from '../schemas.js'
 
 const router = Router()
 
@@ -18,13 +18,10 @@ router.get('/', authenticate, requireRole('admin'), async (_req: Request, res: R
   }
 })
 
-router.patch('/:id', authenticate, requireRole('admin'), async (req: Request, res: Response) => {
+router.patch('/:id', authenticate, requireRole('admin'), validate(updateRoleSchema), async (req: Request, res: Response) => {
   try {
     const { id } = req.params
     const { role } = req.body
-    if (!VALID_ROLES.includes(role)) {
-      return res.status(400).json({ error: 'Invalid role' })
-    }
     const actor = (req as any).user
     if (actor.userId === id) {
       return res.status(400).json({ error: 'You cannot change your own role' })

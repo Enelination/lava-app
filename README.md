@@ -53,7 +53,8 @@ LAVA is a full‑stack web application for property valuation workflows in Ghana
 
 - **Monorepo** — `backend/` and `frontend/` are npm workspaces managed from the root `package.json`.
 - **Single server** — in production, Express serves both the `/api/*` REST API and the built React SPA (`frontend/dist`), so one Render service hosts everything.
-- **Auth model** — the backend issues its own signed JWTs (7‑day expiry). Passwords are bcrypt‑hashed. Supabase is used purely as a data store via PostgREST with the anon key; **RLS / service_role are not used** — authorization is enforced in the Express layer. The user's role is **re-read from the database on every authenticated request**, so role changes (e.g. promoting a verifier) take effect immediately without re‑logging in.
+- **Auth model** — the backend issues its own signed JWTs (7‑day expiry). Passwords are bcrypt‑hashed. **`JWT_SECRET` is required in production** — the server refuses to boot without it (fail-fast). Supabase is used purely as a data store via PostgREST using the **`service_role` key server-side** (RLS is enabled and the `anon`/`authenticated` roles are revoked — see `backend/scripts/rls-policies.sql`); authorization is additionally enforced in the Express layer. The user's role is **re-read from the database on every authenticated request**, so role changes (e.g. promoting a verifier) take effect immediately without re‑logging in.
+- **Validation & logging** — every request body is validated with **zod** (`backend/src/schemas.ts`) and rejected with 400 + details before reaching the handler. All requests are logged via **pino** (`pino-http`); error tracking via **Sentry** when `SENTRY_DSN` is set.
 - **Audit & notifications** — verification changes, role changes and sign-ins (successful and failed) write to `audit_logs` (who/what/when). Entries older than **5 days are pruned automatically** (at startup, then every 6 hours). Verification changes also insert a row into `notifications` for the submission owner. The bell UI polls `GET /api/notifications` every 30 seconds.
 
 ---
@@ -113,6 +114,9 @@ Run the SQL scripts in order in the Supabase **SQL Editor** (you only need the s
 
 1. `backend/scripts/init-supabase.sql`
 2. `backend/scripts/audit-and-notifications.sql`
+3. `backend/scripts/rls-policies.sql` — **production only.** Enables Row Level Security and revokes all
+   `anon`/`authenticated` access. Run it only after you've configured `SUPABASE_SERVICE_ROLE_KEY`, since the
+   backend (and only the backend) talks to the database through the service role.
 
 ---
 
@@ -148,16 +152,27 @@ Open http://localhost:5173 — the Vite dev server proxies `/api` to the backend
 | Variable | Required | Description |
 | --- | --- | --- |
 | `SUPABASE_URL` | Yes | Supabase project URL, e.g. `https://<ref>.supabase.co` |
-| `SUPABASE_ANON_KEY` | Yes | Supabase anon (publishable) key. Safe to use client-side; authz is in Express. |
-| `JWT_SECRET` | Yes* | Long random string used to sign sessions. **If unset, an ephemeral secret is generated and every restart logs everyone out.** |
+| `SUPABASE_SERVICE_ROLE_KEY` | Yes (prod) | Supabase `service_role` key — **server-only, never ship to the browser**. Bypasses RLS, used for all PostgREST access. |
+| `SUPABASE_ANON_KEY` | Dev only | Fallback for local dev. Revoked in production by `rls-policies.sql` — do **not** use it once RLS is enabled. |
+| `JWT_SECRET` | **Yes (prod)** | Long random string used to sign sessions. **In production the server refuses to boot without it.** In dev an ephemeral secret is generated (restart logs everyone out). |
 | `CLAUDE_API_KEY` | Yes (AI) | Anthropic API key for the AI assistant. **Auto-synced into the `settings` table on every startup, so it survives deploys.** You can also set it from the Settings tab. |
+| `SENTRY_DSN` | No | Enables Sentry error tracking when set. |
+| `LOG_LEVEL` | No | Pino log level (default `info`). |
 | `APP_ORIGINS` | No | Comma-separated allowed CORS origins. Defaults to localhost, `*.onrender.com`, `*.vercel.app`. |
 | `PORT` | No | Backend port (default `3001`). |
 | `SEED_DEMO_USERS` | No | `1` to seed demo users at startup (only when `users` is empty). |
 
-`backend/src/lib/supabase.ts` falls back to the project's Supabase URL/key if the env vars are unset, so the app boots without configuration — but you **must** set the real values in production.
+`backend/src/lib/supabase.ts` falls back to the project's Supabase URL if `SUPABASE_URL` is unset, but you **must** set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` and `JWT_SECRET` in production.
 
 > Generate a strong secret with: `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`
+
+---
+
+## Testing & CI
+
+- Backend unit + integration tests use **Vitest**: `npm run test -w backend`.
+- Typecheck: `npm run typecheck` (backend + frontend).
+- **GitHub Actions** (`.github/workflows/ci.yml`) runs typecheck, tests and builds on every push/PR.
 
 ---
 
@@ -167,9 +182,10 @@ The app deploys to Render from GitHub `Enelination/lava-app` (push to `main` tri
 
 1. **Create a Render account** and connect the repo (or follow your existing setup).
 2. **Set environment variables** in Render → your service → Environment:
-   - `SUPABASE_URL`, `SUPABASE_ANON_KEY`
-   - `JWT_SECRET` (long random string — **critical**)
+   - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
+   - `JWT_SECRET` (long random string — **critical, the app will not boot without it**)
    - `CLAUDE_API_KEY`
+   - `SENTRY_DSN` (optional), `APP_ORIGINS` (optional)
 3. **Run the SQL scripts** in your production Supabase project's SQL Editor (see [Database](#database)).
 4. Deploy (Render auto-deploys on push, or click Manual Deploy → Deploy latest commit).
 5. Health check: `GET /api/health` → `{ "status": "ok" }`.
@@ -191,7 +207,13 @@ services:
         sync: false
       - key: SUPABASE_URL
         sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
       - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: APP_ORIGINS
         sync: false
 ```
 

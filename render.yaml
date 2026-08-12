@@ -8,11 +8,20 @@ services:
     envVars:
       # Set these in the Render dashboard (or paste values below).
       # CLAUDE_API_KEY is required for the AI assistant.
+      # JWT_SECRET is REQUIRED in production — the app refuses to boot without it.
+      # SUPABASE_SERVICE_ROLE_KEY is REQUIRED for the server-side DB access (bypasses RLS).
+      # SENTRY_DSN is optional — enables error tracking.
       - key: CLAUDE_API_KEY
         sync: false
       - key: JWT_SECRET
         sync: false
       - key: SUPABASE_URL
         sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
       - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: APP_ORIGINS
         sync: false

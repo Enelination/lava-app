@@ -1,6 +1,8 @@
 import { Router, Request, Response } from 'express'
 import { selectRows, upsertRows } from '../lib/supabase.js'
 import { authenticate, requireRole } from '../middleware/auth.js'
+import { validate } from '../middleware/validate.js'
+import { settingsSchema } from '../schemas.js'
 
 const router = Router()
 
@@ -17,7 +19,7 @@ router.get('/', authenticate, requireRole('admin'), async (_req: Request, res: R
   }
 })
 
-router.put('/', authenticate, requireRole('admin'), async (req: Request, res: Response) => {
+router.put('/', authenticate, requireRole('admin'), validate(settingsSchema), async (req: Request, res: Response) => {
   try {
     const updates = req.body
     const rows = Object.entries(updates).map(([key, value]) => ({ key, value: String(value) }))

@@ -2,13 +2,20 @@ import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 import { randomBytes } from 'crypto'
 import { selectRows } from '../lib/supabase.js'
+import { logger } from '../lib/logger.js'
 import type { JwtPayload } from '../types.js'
+
+const NODE_ENV = process.env.NODE_ENV || 'development'
 
 let JWT_SECRET: string = process.env.JWT_SECRET || ''
 if (!JWT_SECRET) {
+  if (NODE_ENV === 'production') {
+    // Fail fast: refusing to boot beats silently invalidating every session on restart.
+    throw new Error('JWT_SECRET must be set in production. Set it as an environment variable and redeploy.')
+  }
   JWT_SECRET = randomBytes(32).toString('hex')
-  console.warn(
-    'WARNING: JWT_SECRET not set. Generated an ephemeral secret — all sessions will be invalidated on every server restart. Set JWT_SECRET in production.'
+  logger.warn(
+    'JWT_SECRET not set — generated an ephemeral secret. All sessions will be invalidated on every server restart. Set JWT_SECRET in production.'
   )
 }
 

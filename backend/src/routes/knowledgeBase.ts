@@ -2,6 +2,8 @@ import { Router, Request, Response } from 'express'
 import { v4 as uuid } from 'uuid'
 import { selectRows, insertRow, updateRows, deleteRows } from '../lib/supabase.js'
 import { authenticate, requireRole } from '../middleware/auth.js'
+import { validate } from '../middleware/validate.js'
+import { kbUploadSchema, kbUpdateSchema } from '../schemas.js'
 
 const router = Router()
 
@@ -17,7 +19,7 @@ router.get('/', async (_req: Request, res: Response) => {
   }
 })
 
-router.post('/upload', authenticate, requireRole('admin'), async (req: Request, res: Response) => {
+router.post('/upload', authenticate, requireRole('admin'), validate(kbUploadSchema), async (req: Request, res: Response) => {
   try {
     const { name, content } = req.body
     if (!name || !content) {
@@ -61,7 +63,7 @@ router.get('/:id', authenticate, requireRole('admin'), async (req: Request, res:
   }
 })
 
-router.patch('/:id', authenticate, requireRole('admin'), async (req: Request, res: Response) => {
+router.patch('/:id', authenticate, requireRole('admin'), validate(kbUpdateSchema), async (req: Request, res: Response) => {
   try {
     const { id } = req.params
     const { name, content } = req.body

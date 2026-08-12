@@ -1,10 +1,9 @@
 import { Router, Request, Response } from 'express'
 import { v4 as uuid } from 'uuid'
-import { selectRows, countRows, insertRow, updateRows, deleteRows } from '../lib/supabase.js'
+import { selectRows, selectAllRows, countRows, insertRow, updateRows, deleteRows } from '../lib/supabase.js'
 import { authenticate, requireRole } from '../middleware/auth.js'
-
-const VALID_STATUSES = ['Pending', 'Verified', 'Flagged', 'Rejected']
-const VALID_TRUST = ['High', 'Medium', 'Low']
+import { validate } from '../middleware/validate.js'
+import { createSubmissionSchema, updateSubmissionSchema } from '../schemas.js'
 
 const router = Router()
 
@@ -12,12 +11,11 @@ router.get('/', async (req: Request, res: Response) => {
   try {
     const { status, limit, offset } = req.query
     const where = status && status !== 'all' ? { status: String(status) } : {}
-    const rows = await selectRows('submissions', {
-      where,
-      order: 'submitted_at.desc',
-      limit: limit ? parseInt(limit as string) : undefined,
-      offset: offset ? parseInt(offset as string) : undefined,
-    })
+    const order = 'submitted_at.desc'
+    // PostgREST caps a single request at 1000 rows — page through all rows by default.
+    const rows = limit
+      ? await selectRows('submissions', { where, order, limit: parseInt(limit as string), offset: offset ? parseInt(offset as string) : undefined })
+      : await selectAllRows('submissions', { where, order })
     res.json(rows)
   } catch (err: any) {
     res.status(500).json({ error: err.message })
@@ -31,7 +29,7 @@ router.get('/stats', async (_req: Request, res: Response) => {
     const pending = await countRows('submissions', { status: 'Pending' })
     const flagged = await countRows('submissions', { status: 'Flagged' })
     const rejected = await countRows('submissions', { status: 'Rejected' })
-    const regionRows = await selectRows('submissions', { select: 'region' })
+    const regionRows = await selectAllRows('submissions', { select: 'region' })
     const regions = new Set(regionRows.map((r) => r.region).filter(Boolean)).size
 
     res.json({ total, verified, pending, flagged, rejected, regions })
@@ -40,7 +38,7 @@ router.get('/stats', async (_req: Request, res: Response) => {
   }
 })
 
-router.post('/', authenticate, requireRole('public', 'surveyor', 'officer', 'admin'), async (req: Request, res: Response) => {
+router.post('/', authenticate, requireRole('public', 'surveyor', 'officer', 'admin'), validate(createSubmissionSchema), async (req: Request, res: Response) => {
   try {
     const { userId } = (req as any).user
     const id = uuid()
@@ -86,7 +84,7 @@ router.post('/', authenticate, requireRole('public', 'surveyor', 'officer', 'adm
   }
 })
 
-router.patch('/:id', authenticate, requireRole('officer', 'admin'), async (req: Request, res: Response) => {
+router.patch('/:id', authenticate, requireRole('officer', 'admin'), validate(updateSubmissionSchema), async (req: Request, res: Response) => {
   try {
     const { id } = req.params
     const { status, trust_score } = req.body
@@ -97,16 +95,10 @@ router.patch('/:id', authenticate, requireRole('officer', 'admin'), async (req: 
 
     const updates: Record<string, unknown> = {}
     if (status !== undefined) {
-      if (!VALID_STATUSES.includes(status)) {
-        return res.status(400).json({ error: 'Invalid status' })
-      }
       updates.status = status
       if (status === 'Verified') updates.verified_at = new Date().toISOString()
     }
     if (trust_score !== undefined) {
-      if (!VALID_TRUST.includes(trust_score)) {
-        return res.status(400).json({ error: 'Invalid trust score' })
-      }
       updates.trust_score = trust_score
     }
 

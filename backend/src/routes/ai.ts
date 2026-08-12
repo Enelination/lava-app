@@ -1,6 +1,8 @@
 import { Router, Request, Response } from 'express'
 import { selectRows, countRows, insertRow, deleteRows } from '../lib/supabase.js'
 import { authenticate, optionalAuth } from '../middleware/auth.js'
+import { validate } from '../middleware/validate.js'
+import { chatSchema } from '../schemas.js'
 
 const router = Router()
 
@@ -49,7 +51,7 @@ router.delete('/history', authenticate, async (req: Request, res: Response) => {
   }
 })
 
-router.post('/chat', optionalAuth, async (req: Request, res: Response) => {
+router.post('/chat', optionalAuth, validate(chatSchema), async (req: Request, res: Response) => {
   try {
     const { messages, isPublic } = req.body
     const userId = (req as any).user?.userId

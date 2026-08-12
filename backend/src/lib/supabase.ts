@@ -1,14 +1,24 @@
 import bcrypt from 'bcryptjs'
+import { logger } from './logger.js'
 
 const SUPABASE_URL = (process.env.SUPABASE_URL || 'https://ggewqgaeoiahegeexvzs.supabase.co').replace(/\/+$/, '')
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdnZXdxZ2Flb2lhaGVnZWV4dnpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxMzkyOTEsImV4cCI6MjA5OTcxNTI5MX0.l-XGjUG4FrtNqsPnj07kVcCsZ9SzPNghAKrr--cN5dI'
+
+// Prefer the service_role key (bypasses RLS, server-only, never ship it to the browser).
+// The anon key is only a legacy/dev fallback — it will be locked down by RLS in production.
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || ''
+
+if (!SUPABASE_KEY) {
+  logger.warn('No Supabase key configured. Set SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_ANON_KEY for dev).')
+} else if (!process.env.SUPABASE_SERVICE_ROLE_KEY && (process.env.NODE_ENV || 'development') === 'production') {
+  logger.warn('Using SUPABASE_ANON_KEY in production. Prefer SUPABASE_SERVICE_ROLE_KEY once RLS is enabled.')
+}
 
 export type Row = Record<string, any>
 
 async function request(path: string, init: RequestInit = {}): Promise<Response> {
   const headers = new Headers(init.headers)
-  headers.set('apikey', SUPABASE_ANON_KEY)
-  headers.set('Authorization', `Bearer ${SUPABASE_ANON_KEY}`)
+  headers.set('apikey', SUPABASE_KEY)
+  headers.set('Authorization', `Bearer ${SUPABASE_KEY}`)
   if (init.body) headers.set('Content-Type', 'application/json')
 
   const res = await fetch(`${SUPABASE_URL}${path}`, { ...init, headers })
@@ -66,6 +76,19 @@ export async function selectRows(table: string, opts: SelectOptions = {}): Promi
   const res = await request(`/rest/v1/${table}${buildQuery(params)}`)
   const rows = await res.json()
   return Array.isArray(rows) ? rows : []
+}
+
+// PostgREST caps a single request at 1000 rows. Loop over pages so callers get the full dataset.
+const PAGING_LIMIT = 1000
+
+export async function selectAllRows(table: string, opts: Omit<SelectOptions, 'limit' | 'offset'> = {}): Promise<Row[]> {
+  const all: Row[] = []
+  for (let offset = 0; ; offset += PAGING_LIMIT) {
+    const chunk = await selectRows(table, { ...opts, limit: PAGING_LIMIT, offset })
+    all.push(...chunk)
+    if (chunk.length < PAGING_LIMIT) break
+  }
+  return all
 }
 
 export async function countRows(table: string, where?: Record<string, unknown>): Promise<number> {
@@ -135,7 +158,7 @@ async function seedUsers() {
   const count = await countRows('users')
   if (count > 0) return
   if (process.env.SEED_DEMO_USERS !== '1') {
-    console.warn('Skipped demo user seeding (set SEED_DEMO_USERS=1 to enable).')
+    logger.warn('Skipped demo user seeding (set SEED_DEMO_USERS=1 to enable).')
     return
   }
   const hash = bcrypt.hashSync('lava2025', 10)
@@ -148,7 +171,7 @@ async function seedUsers() {
     ],
     'id'
   )
-  console.log('Seeded demo users.')
+  logger.info('Seeded demo users.')
 }
 
 async function seedKnowledgeBase() {
@@ -159,7 +182,7 @@ async function seedKnowledgeBase() {
     BUILTIN_DOCS.map((d) => ({ ...d, word_count: d.content.split(/\s+/).length })),
     'id'
   )
-  console.log('Seeded knowledge base documents.')
+  logger.info('Seeded knowledge base documents.')
 }
 
 async function seedSettings() {
@@ -168,7 +191,7 @@ async function seedSettings() {
   const existing = await selectRows('settings', { where: { key: 'claude_api_key' }, select: 'value' })
   if (existing.length && existing[0].value === claudeKey) return
   await upsertRows('settings', [{ key: 'claude_api_key', value: claudeKey }], 'key')
-  console.log(
+  logger.info(
     existing.length
       ? 'Synced Claude API key from environment.'
       : 'Seeded Claude API key setting.'
@@ -187,19 +210,19 @@ export async function pingSupabase(): Promise<{ ok: boolean; rows: number; error
 export async function initSupabase(): Promise<boolean> {
   const ping = await pingSupabase()
   if (!ping.ok) {
-    console.warn(
+    logger.warn(
       `Supabase not reachable: ${ping.error}. If tables are missing, run backend/scripts/init-supabase.sql in the Supabase SQL editor.`
     )
     return false
   }
-  console.log(`Supabase connected — ${ping.rows} submissions in database.`)
+  logger.info(`Supabase connected — ${ping.rows} submissions in database.`)
   try {
     await seedUsers()
     await seedKnowledgeBase()
     await seedSettings()
     return true
   } catch (err: any) {
-    console.warn(
+    logger.warn(
       `Supabase seeding incomplete: ${err.message}. Run backend/scripts/init-supabase.sql in the Supabase SQL editor.`
     )
     return false

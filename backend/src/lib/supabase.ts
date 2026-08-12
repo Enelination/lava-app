@@ -3,12 +3,19 @@ import { logger } from './logger.js'
 
 const SUPABASE_URL = (process.env.SUPABASE_URL || 'https://ggewqgaeoiahegeexvzs.supabase.co').replace(/\/+$/, '')
 
-// Prefer the service_role key (bypasses RLS, server-only, never ship it to the browser).
-// The anon key is only a legacy/dev fallback — it will be locked down by RLS in production.
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || ''
+// PostgREST access key, resolved in order of preference:
+//   1. SUPABASE_SERVICE_ROLE_KEY  — server-only secret, bypasses RLS (the hardening target)
+//   2. SUPABASE_ANON_KEY (env)    — publishable Supabase key
+//   3. anon key fallback          — publishable by design (safe to embed, it is not a secret);
+//                                   included so the app works out-of-the-box on existing deploys.
+// The service_role key is never embedded in source.
+const SUPABASE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdnZXdxZ2Flb2lhaGVnZWV4dnpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxMzkyOTEsImV4cCI6MjA5OTcxNTI5MX0.l-XGjUG4FrtNqsPnj07kVcCsZ9SzPNghAKrr--cN5dI'
 
-if (!SUPABASE_KEY) {
-  logger.warn('No Supabase key configured. Set SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_ANON_KEY for dev).')
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.SUPABASE_ANON_KEY) {
+  logger.warn('Using the built-in anon key fallback. Set SUPABASE_SERVICE_ROLE_KEY in production.')
 } else if (!process.env.SUPABASE_SERVICE_ROLE_KEY && (process.env.NODE_ENV || 'development') === 'production') {
   logger.warn('Using SUPABASE_ANON_KEY in production. Prefer SUPABASE_SERVICE_ROLE_KEY once RLS is enabled.')
 }

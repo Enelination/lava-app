@@ -158,6 +158,7 @@ export function Dashboard() {
             <div className="recordHeader">
               <span>Place</span>
               <span>Land use</span>
+              <span>Land size</span>
               <span>Price (GHS)</span>
               <span>Trust</span>
               <span>Verified</span>
@@ -180,6 +181,7 @@ export function Dashboard() {
                     <div className="recordSmall">{r.district || r.region}</div>
                   </span>
                   <span>{r.land_use || '—'}</span>
+                  <span>{r.land_size ? `${r.land_size} ${r.unit || ''}`.trim() : '—'}</span>
                   <span className="recordPrice">{formatCurrency(r.price)}</span>
                   <span className="trustScore">
                     <i

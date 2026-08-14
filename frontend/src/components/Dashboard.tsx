@@ -12,6 +12,10 @@ const GUEST_LIMIT = 3
 const inputCls =
   'w-full border border-line rounded-sm2 bg-paper px-3 py-2.5 text-xs text-ink outline-none focus:border-muted transition-colors placeholder:text-[#b0bcc3]'
 
+type Filters = { region: string; district: string; propertyType: string; landUse: string; trust: string }
+
+const EMPTY_FILTERS: Filters = { region: '', district: '', propertyType: '', landUse: '', trust: '' }
+
 export function Dashboard() {
   const { user, openAuth } = useAuth()
   const isGuest = !user
@@ -20,6 +24,7 @@ export function Dashboard() {
   const [error, setError] = useState('')
   const [query, setQuery] = useState('')
   const [page, setPage] = useState(1)
+  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS)
 
   const loadData = async () => {
     setLoading(true)
@@ -46,18 +51,53 @@ export function Dashboard() {
     setPage(1)
   }, [query])
 
+  const verified = useMemo(() => submissions.filter((s) => s.status === 'Verified'), [submissions])
+
+  const regions = useMemo(
+    () => [...new Set(verified.map((r) => r.region).filter(Boolean))].sort(),
+    [verified]
+  )
+  const districts = useMemo(() => {
+    const base = filters.region ? verified.filter((r) => r.region === filters.region) : verified
+    return [...new Set(base.map((r) => r.district).filter(Boolean))].sort()
+  }, [verified, filters.region])
+  const landUses = useMemo(
+    () => [...new Set(verified.map((r) => r.land_use).filter(Boolean))].sort(),
+    [verified]
+  )
+  const propertyTypes = useMemo(
+    () => [...new Set(verified.map((r) => r.property_type).filter(Boolean))].sort(),
+    [verified]
+  )
+
+  const setFilter = (key: keyof Filters, value: string) => {
+    setFilters((f) => ({
+      ...f,
+      [key]: value,
+      ...(key === 'region' ? { district: '' } : {}),
+    }))
+    setPage(1)
+  }
+
+  const activeFilterCount = Object.values(filters).filter(Boolean).length
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
-    const verified = submissions.filter((s) => s.status === 'Verified')
-    const list = q
-      ? verified.filter((s) =>
-          [s.community, s.district, s.region, s.land_use, s.tenure_type, s.surveyor_name, s.licence_number]
-            .filter(Boolean)
-            .some((v) => String(v).toLowerCase().includes(q))
-        )
-      : verified
+    const list = verified.filter((s) => {
+      if (filters.region && s.region !== filters.region) return false
+      if (filters.district && s.district !== filters.district) return false
+      if (filters.propertyType && s.property_type !== filters.propertyType) return false
+      if (filters.landUse && s.land_use !== filters.landUse) return false
+      if (filters.trust && s.trust_score !== filters.trust) return false
+      if (q) {
+        return [s.community, s.district, s.region, s.land_use, s.tenure_type, s.surveyor_name, s.licence_number]
+          .filter(Boolean)
+          .some((v) => String(v).toLowerCase().includes(q))
+      }
+      return true
+    })
     return list.sort((a, b) => new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime())
-  }, [submissions, query])
+  }, [verified, query, filters])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
   const currentPage = Math.min(page, totalPages)
@@ -154,6 +194,65 @@ export function Dashboard() {
               </div>
             )}
           </div>
+          {!isGuest && (
+            <div className="filters">
+              <select
+                value={filters.region}
+                onChange={(e) => setFilter('region', e.target.value)}
+                className={inputCls}
+              >
+                <option value="">All regions</option>
+                {regions.map((r) => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+              <select
+                value={filters.district}
+                onChange={(e) => setFilter('district', e.target.value)}
+                className={inputCls}
+              >
+                <option value="">All districts</option>
+                {districts.map((d) => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
+              <select
+                value={filters.propertyType}
+                onChange={(e) => setFilter('propertyType', e.target.value)}
+                className={inputCls}
+              >
+                <option value="">All property types</option>
+                {propertyTypes.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+              <select
+                value={filters.landUse}
+                onChange={(e) => setFilter('landUse', e.target.value)}
+                className={inputCls}
+              >
+                <option value="">All land uses</option>
+                {landUses.map((u) => (
+                  <option key={u} value={u}>{u}</option>
+                ))}
+              </select>
+              <select
+                value={filters.trust}
+                onChange={(e) => setFilter('trust', e.target.value)}
+                className={inputCls}
+              >
+                <option value="">All trust</option>
+                {['High', 'Medium', 'Low'].map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+              {activeFilterCount > 0 && (
+                <button className="button outline" onClick={() => { setFilters(EMPTY_FILTERS); setPage(1) }}>
+                  Clear ({activeFilterCount})
+                </button>
+              )}
+            </div>
+          )}
           <div className="records">
             <div className="recordHeader">
               <span>Place</span>

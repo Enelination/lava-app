@@ -779,6 +779,23 @@
   }
 
   /* ---------- Records ---------- */
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px 27px;
+    border-bottom: 1px solid var(--line);
+    background: #fbfcfb;
+  }
+  .filters select {
+    flex: 1 1 150px;
+    max-width: 210px;
+  }
+  .filters .button {
+    flex-shrink: 0;
+    padding: 9px 14px;
+    font-size: 12px;
+  }
   .records {
     margin-top: 12px;
   }

@@ -397,8 +397,7 @@ export function BatchUpload({ onClose }: Props) {
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
       <motion.div
-        className="authModal"
-        style={{ maxWidth: 560, maxHeight: '90vh', overflowY: 'auto' }}
+        className="authModal batchModal"
         initial={{ opacity: 0, scale: 0.96, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96, y: 12 }}
@@ -411,10 +410,9 @@ export function BatchUpload({ onClose }: Props) {
         <h2>Batch Upload</h2>
         <p>Upload multiple property submissions at once via Excel.</p>
 
-        <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+        <div className="batchActions">
           <button
             className="button outline"
-            style={{ flex: 1, fontSize: 13 }}
             onClick={generateTemplate}
             type="button"
           >
@@ -423,7 +421,6 @@ export function BatchUpload({ onClose }: Props) {
           </button>
           <button
             className="button ghost"
-            style={{ fontSize: 13 }}
             onClick={onClose}
             type="button"
           >
@@ -440,19 +437,11 @@ export function BatchUpload({ onClose }: Props) {
               exit={{ opacity: 0, y: -8 }}
             >
               <div
+                className={`batchDropZone${dragOver ? ' dragOver' : ''}`}
                 onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
                 onDragLeave={() => setDragOver(false)}
                 onDrop={handleDrop}
                 onClick={() => inputRef.current?.click()}
-                style={{
-                  border: `2px dashed ${dragOver ? 'var(--gold, #D4A853)' : 'var(--border, #E0DDD5)'}`,
-                  borderRadius: 10,
-                  padding: '32px 20px',
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                  background: dragOver ? 'rgba(212, 168, 83, 0.06)' : 'transparent',
-                  transition: 'border-color 0.15s, background 0.15s',
-                }}
               >
                 <Upload size={28} style={{ color: 'var(--muted, #8A8680)', marginBottom: 8 }} />
                 <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink, #1A1A1A)' }}>
@@ -478,10 +467,10 @@ export function BatchUpload({ onClose }: Props) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              style={{ textAlign: 'center', padding: '24px 0' }}
+              className="batchSpinner"
             >
               <Loader2 size={24} className="animate-spin" style={{ color: 'var(--gold, #D4A853)' }} />
-              <div style={{ fontSize: 13, color: 'var(--muted, #8A8680)', marginTop: 8 }}>Reading {fileName}…</div>
+              <div className="batchSpinnerText">Reading {fileName}…</div>
             </motion.div>
           )}
 
@@ -492,17 +481,17 @@ export function BatchUpload({ onClose }: Props) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, padding: '10px 14px', background: 'rgba(39, 174, 96, 0.08)', borderRadius: 8, border: '1px solid rgba(39, 174, 96, 0.2)' }}>
-                <CheckCircle size={16} style={{ color: '#27AE60', flexShrink: 0 }} />
-                <div style={{ fontSize: 13 }}>
+              <div className="batchResult success">
+                <CheckCircle size={16} className="batchResultOk" />
+                <div className="batchResultText">
                   <strong>{parsedRows.length}</strong> rows read from <strong>{fileName}</strong> — all valid
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button className="button" style={{ flex: 1, fontSize: 13 }} onClick={handleUpload} type="button">
+              <div className="batchButtons">
+                <button className="button" onClick={handleUpload} type="button">
                   Upload {parsedRows.length} Submissions
                 </button>
-                <button className="button ghost" style={{ fontSize: 13 }} onClick={reset} type="button">
+                <button className="button ghost" onClick={reset} type="button">
                   Choose another file
                 </button>
               </div>
@@ -516,27 +505,27 @@ export function BatchUpload({ onClose }: Props) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, padding: '10px 14px', background: 'rgba(192, 57, 43, 0.08)', borderRadius: 8, border: '1px solid rgba(192, 57, 43, 0.2)' }}>
-                <AlertCircle size={16} style={{ color: '#C0392B', flexShrink: 0 }} />
-                <div style={{ fontSize: 13 }}>
+              <div className="batchResult error">
+                <AlertCircle size={16} className="batchResultErr" />
+                <div className="batchResultText">
                   <strong>{validationErrors.length}</strong> validation issue{validationErrors.length > 1 ? 's' : ''} found
                 </div>
               </div>
-              <div style={{ maxHeight: 200, overflowY: 'auto', marginBottom: 12, border: '1px solid var(--border, #E0DDD5)', borderRadius: 8 }}>
-                <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse' }}>
+              <div className="batchErrorTable">
+                <table>
                   <thead>
-                    <tr style={{ background: 'var(--mist, #F5F3EE)' }}>
-                      <th style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 600 }}>Row</th>
-                      <th style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 600 }}>Field</th>
-                      <th style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 600 }}>Issue</th>
+                    <tr>
+                      <th>Row</th>
+                      <th>Field</th>
+                      <th>Issue</th>
                     </tr>
                   </thead>
                   <tbody>
                     {validationErrors.slice(0, 30).map((e, i) => (
-                      <tr key={i} style={{ borderTop: '1px solid var(--border, #E0DDD5)' }}>
-                        <td style={{ padding: '5px 10px' }}>{e.row}</td>
-                        <td style={{ padding: '5px 10px', fontWeight: 500 }}>{e.field}</td>
-                        <td style={{ padding: '5px 10px', color: 'var(--muted, #8A8680)' }}>{e.message}</td>
+                      <tr key={i}>
+                        <td>{e.row}</td>
+                        <td style={{ fontWeight: 500 }}>{e.field}</td>
+                        <td style={{ color: 'var(--muted, #8A8680)' }}>{e.message}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -547,7 +536,7 @@ export function BatchUpload({ onClose }: Props) {
                   </div>
                 )}
               </div>
-              <button className="button ghost" style={{ width: '100%', fontSize: 13 }} onClick={reset} type="button">
+              <button className="button ghost" style={{ width: '100%' }} onClick={reset} type="button">
                 Fix and try again
               </button>
             </motion.div>
@@ -559,10 +548,10 @@ export function BatchUpload({ onClose }: Props) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              style={{ textAlign: 'center', padding: '24px 0' }}
+              className="batchSpinner"
             >
               <Loader2 size={24} className="animate-spin" style={{ color: 'var(--gold, #D4A853)' }} />
-              <div style={{ fontSize: 13, color: 'var(--muted, #8A8680)', marginTop: 8 }}>
+              <div className="batchSpinnerText">
                 Uploading {parsedRows.length} submissions…
               </div>
             </motion.div>
@@ -575,37 +564,37 @@ export function BatchUpload({ onClose }: Props) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, padding: '10px 14px', background: 'rgba(39, 174, 96, 0.08)', borderRadius: 8, border: '1px solid rgba(39, 174, 96, 0.2)' }}>
-                <CheckCircle size={16} style={{ color: '#27AE60', flexShrink: 0 }} />
-                <div style={{ fontSize: 13 }}>
+              <div className="batchResult success">
+                <CheckCircle size={16} className="batchResultOk" />
+                <div className="batchResultText">
                   <strong>{createdCount}</strong> submission{createdCount !== 1 ? 's' : ''} created and added to the verification queue
                 </div>
               </div>
               {serverErrors.length > 0 && (
-                <div style={{ maxHeight: 150, overflowY: 'auto', marginBottom: 12, border: '1px solid var(--border, #E0DDD5)', borderRadius: 8 }}>
-                  <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse' }}>
+                <div className="batchErrorTable" style={{ maxHeight: 150 }}>
+                  <table>
                     <thead>
-                      <tr style={{ background: 'var(--mist, #F5F3EE)' }}>
-                        <th style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 600 }}>Row</th>
-                        <th style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 600 }}>Error</th>
+                      <tr>
+                        <th>Row</th>
+                        <th>Error</th>
                       </tr>
                     </thead>
                     <tbody>
                       {serverErrors.map((e, i) => (
-                        <tr key={i} style={{ borderTop: '1px solid var(--border, #E0DDD5)' }}>
-                          <td style={{ padding: '5px 10px' }}>{e.row}</td>
-                          <td style={{ padding: '5px 10px', color: 'var(--muted, #8A8680)' }}>{e.message}</td>
+                        <tr key={i}>
+                          <td>{e.row}</td>
+                          <td style={{ color: 'var(--muted, #8A8680)' }}>{e.message}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
               )}
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button className="button outline" style={{ flex: 1, fontSize: 13 }} onClick={reset} type="button">
+              <div className="batchButtons">
+                <button className="button outline" onClick={reset} type="button">
                   Upload more
                 </button>
-                <button className="button" style={{ fontSize: 13 }} onClick={onClose} type="button">
+                <button className="button" onClick={onClose} type="button">
                   Done
                 </button>
               </div>

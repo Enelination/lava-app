@@ -4,7 +4,7 @@ LAVA is a full‑stack web application for property valuation workflows in Ghana
 
 | Layer | Tech |
 | --- | --- |
-| Frontend | React 18, Vite, TypeScript, Tailwind CSS, Zustand, Recharts, react‑markdown, PWA |
+| Frontend | React 18, Vite, TypeScript, Tailwind CSS, Zustand, Recharts, react‑markdown, PWA, exceljs |
 | Backend | Node.js (ESM), Express, TypeScript, Helmet, express‑rate‑limit, JWT auth |
 | Data | Supabase (Postgres via PostgREST), accessed with the anon key |
 | Deploy | Render (Docker), auto‑deploy on push to `main` |
@@ -78,7 +78,7 @@ lava-app/
 │       ├── App.tsx                     # router: landing + /app
 │       ├── components/                 # LandingPage, Dashboard, SubmitData, VerificationQueue,
 │       │                               # AIAssistant, KnowledgeBase, Settings, Profile, AuthModal,
-│       │                               # NotificationsBell, AuditLog, Navbar, AppLayout
+│       │                               # NotificationsBell, AuditLog, Navbar, AppLayout, BatchUpload
 │       ├── store/                      # authStore, appStore (Zustand)
 │       └── lib/                        # api.ts (fetch client), utils.ts
 ├── Dockerfile                          # multi-stage build for Render
@@ -235,6 +235,7 @@ All endpoints are under `/api`. Auth-protected routes require `Authorization: Be
 | `GET` | `/api/submissions` | public | List submissions (filter/sort via query params) |
 | `GET` | `/api/submissions/stats` | public | Dashboard metrics |
 | `POST` | `/api/submissions` | any signed-in user | Create submission (owner set from token) |
+| `POST` | `/api/submissions/batch` | any signed-in user | Batch create submissions from an array (max 500) |
 | `PATCH` | `/api/submissions/:id` | verifier, admin | Update status/trust → **writes audit log + notifies owner** |
 | `DELETE` | `/api/submissions/:id` | admin | Permanently delete a submission → **writes audit log** |
 | `GET` | `/api/notifications` | auth | Latest 50 notifications + unread count |
@@ -273,6 +274,7 @@ The Swagger UI lets you explore every endpoint, see request/response schemas, an
 | View landing + submit-adjacent info | ✅ | ✅ | ✅ | ✅ |
 | View dashboard, browse submissions | ✅ | ✅ | ✅ | ✅ |
 | Submit a property record | ✅ | ✅ | ✅ | ✅ |
+| Batch upload property records (Excel) | ✅ | ✅ | ✅ | ✅ |
 | Verify / change submission status | ❌ | ❌ | ✅ | ✅ |
 | View notifications | ✅ | ✅ | ✅ | ✅ |
 | Upload / delete knowledge-base docs | ❌ | ❌ | ❌ | ✅ |
@@ -325,3 +327,4 @@ npm run build          # tsc -b && vite build
 - **Notifications only fire for submissions that have a `user_id` owner**; legacy rows without an owner are skipped silently.
 - **Audit logs are pruned after 5 days** (`pruneAuditLogs()` runs at startup and every 6 hours). This is a retention policy, not an archival system.
 - **The AI key persists across deploys.** It lives in the `settings` table (Supabase, durable). `initSupabase()` runs at startup and syncs `CLAUDE_API_KEY` into that table, so configure the key once in your platform's env vars (or the Settings tab) and it self-heals on every deploy.
+- **Batch upload** accepts Excel files (.xlsx) with up to 500 rows. The template includes dropdown validation for enum columns, required-field indicators (red headers), and example rows. Surveyor details are auto-filled from the authenticated user. Any signed-in user can batch upload.

@@ -12,7 +12,7 @@ sequenced so early work de-risks later work (you cannot scale what you cannot ob
 
 | Area | Current state |
 | --- | --- |
-| **Frontend** | React + Vite + Tailwind SPA (PWA-ready: manifest, service worker, install prompt) |
+| **Frontend** | React + Vite + Tailwind SPA (PWA-ready: manifest, service worker, install prompt); Excel batch upload (exceljs) |
 | **Backend** | Express + TypeScript, single process, serves both `/api/*` and the built SPA |
 | **Hosting** | Render, auto-deploy from `main` (`render.yaml` blueprint) |
 | **Database** | Supabase PostgreSQL via **PostgREST with the anon key** — **no RLS**; authorization enforced in Express |
@@ -125,6 +125,7 @@ Currently the app cannot store files. Add **S3 (or Cloudflare R2 / Supabase Stor
 - [ ] **GIS** — store coordinates as **PostGIS**; map view of verified records; distance/area queries.
 
 ### Product features
+- [x] **Batch upload** — Excel-based batch import of property records (template with required-field indicators, dropdown validation, client-side validation, per-row error reporting). Any signed-in user can batch upload.
 - [ ] Public **data explorer** with a read-only API + dataset download.
 - [ ] Admin: bulk verify/reject, **edit records**, deactivate users, reject-reason workflow.
 - [ ] Account: licence verification against GhIS, password reset emails, **2FA for admins**.

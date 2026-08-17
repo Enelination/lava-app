@@ -3,7 +3,7 @@ import { v4 as uuid } from 'uuid'
 import { selectRows, selectAllRows, countRows, insertRow, updateRows, deleteRows } from '../lib/supabase.js'
 import { authenticate, requireRole } from '../middleware/auth.js'
 import { validate } from '../middleware/validate.js'
-import { createSubmissionSchema, updateSubmissionSchema } from '../schemas.js'
+import { createSubmissionSchema, batchSubmissionsSchema, updateSubmissionSchema } from '../schemas.js'
 
 const router = Router()
 
@@ -79,6 +79,62 @@ router.post('/', authenticate, requireRole('public', 'surveyor', 'officer', 'adm
     })
 
     res.status(201).json(row)
+  } catch (err: any) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+router.post('/batch', authenticate, requireRole('public', 'surveyor', 'officer', 'admin'), validate(batchSubmissionsSchema), async (req: Request, res: Response) => {
+  try {
+    const { userId } = (req as any).user
+    const { submissions } = req.body
+
+    const submitter = (await selectRows('users', { where: { id: userId }, select: 'name,licence_number,organisation,email' }))[0] || {}
+
+    const created: any[] = []
+    const errors: { row: number; field: string; message: string }[] = []
+
+    for (let i = 0; i < submissions.length; i++) {
+      const data = submissions[i]
+      try {
+        const row = await insertRow('submissions', {
+          id: uuid(),
+          property_type: data.property_type || 'Land',
+          region: data.region || '',
+          district: data.district || '',
+          community: data.community || '',
+          gps_coordinates: data.gps_coordinates || '',
+          land_size: data.land_size ?? null,
+          unit: data.unit || 'Acres',
+          land_use: data.land_use || '',
+          tenure_type: data.tenure_type || '',
+          description: data.description || '',
+          bedrooms: data.bedrooms ?? null,
+          bathrooms: data.bathrooms ?? null,
+          storeys: data.storeys ?? null,
+          floor_area: data.floor_area ?? null,
+          building_age: data.building_age ?? null,
+          condition: data.condition ?? null,
+          transaction_type: data.transaction_type || 'Sale',
+          price: data.price || 0,
+          transaction_date: data.transaction_date ?? null,
+          source: data.source || 'Direct transaction',
+          surveyor_name: submitter.name || '',
+          licence_number: submitter.licence_number || '',
+          organisation: submitter.organisation || '',
+          email: submitter.email || '',
+          status: 'Pending',
+          trust_score: null,
+          user_id: userId,
+          submitted_at: new Date().toISOString(),
+        })
+        created.push(row)
+      } catch (err: any) {
+        errors.push({ row: i + 1, field: 'general', message: err.message || 'Insert failed' })
+      }
+    }
+
+    res.status(201).json({ created: created.length, errors })
   } catch (err: any) {
     res.status(500).json({ error: err.message })
   }

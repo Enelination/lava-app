@@ -74,6 +74,12 @@ export const submissions = {
       body: JSON.stringify(data),
     }),
 
+  createBatch: (submissions: Partial<Submission>[]) =>
+    request<{ created: number; errors: { row: number; field: string; message: string }[] }>('/submissions/batch', {
+      method: 'POST',
+      body: JSON.stringify({ submissions }),
+    }),
+
   update: (id: string, data: { status?: string; trust_score?: string }) =>
     request<Submission>(`/submissions/${id}`, {
       method: 'PATCH',

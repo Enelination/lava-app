@@ -61,6 +61,10 @@ export const createSubmissionSchema = z.object({
   source: optionalText(200),
 })
 
+export const batchSubmissionsSchema = z.object({
+  submissions: z.array(createSubmissionSchema).min(1, 'At least one submission is required').max(500, 'Maximum 500 submissions per batch'),
+})
+
 export const updateSubmissionSchema = z
   .object({
     status: z.enum(VALID_STATUSES, { message: 'Invalid status' }).optional(),

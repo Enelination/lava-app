@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
+import { Upload } from 'lucide-react'
 import { submissions as submissionsApi } from '../lib/api'
 import { useAuth } from '../store/authStore'
+import { BatchUpload } from './BatchUpload'
 
 const regions = [
   'Greater Accra', 'Ashanti', 'Eastern', 'Western', 'Central', 'Northern',
@@ -46,6 +48,7 @@ export function SubmitData() {
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [showBatch, setShowBatch] = useState(false)
 
   const [form, setForm] = useState({
     property_type: 'Land',
@@ -160,6 +163,10 @@ export function SubmitData() {
           <h1>Submit <em>transaction data.</em></h1>
           <p>Every submission enters a professional verification workflow before it supports valuation research.</p>
         </div>
+        <button className="button outline" style={{ fontSize: 13 }} onClick={() => setShowBatch(true)} type="button">
+          <Upload size={15} style={{ marginRight: 6 }} />
+          Batch Upload
+        </button>
       </div>
 
       <form
@@ -293,6 +300,10 @@ export function SubmitData() {
           </button>
         </div>
       </form>
+
+      <AnimatePresence>
+        {showBatch && <BatchUpload onClose={() => setShowBatch(false)} />}
+      </AnimatePresence>
     </div>
   )
 }
